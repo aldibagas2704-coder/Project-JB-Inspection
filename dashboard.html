@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Inspeksi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+   <aside class="sidebar">
+  <div class="brand">
+    <img
+      class="brand-logo"
+      <img class="brand-logo" src="assets/logo.png" alt="Logo"
+    />
+    <h2>Dashboard Inspeksi</h2>
+  </div>
+
+  <p class="version">v1.0 • Single File</p>
+  <nav>
+    <ul>
+      <li><button data-page="dashboard-home.html">🏠 Dashboard</button></li>
+      <li><button data-page="form.html">📝 Form Inspeksi</button></li>
+      <li><button data-page="database.html">💾 History</button></li>
+      <li><button data-page="jadwal.html">📅 Jadwal Inspeksi</button></li>
+    </ul>
+  </nav>
+</aside>
+
+    <section class="content">
+      <iframe id="iframe-content" src="dashboard-home.html" frameborder="0"></iframe>
+    </section>
+    <!-- Catatan: tag </main> di file aslinya tidak punya pasangan pembuka.
+         Dibiarkan apa adanya supaya tidak mengubah fungsi lain. -->
+    </main>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
+
+
