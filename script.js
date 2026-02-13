@@ -1,7 +1,7 @@
 // ==========================
 // KONFIGURASI GLOBAL
 // ==========================
-const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // konsisten pakai trailing slash
+const WORKER_URL = "https://jb-inspection-27a4.aldibagas2704.workers.dev/"; // konsisten pakai trailing slash
 
 // ==========================
 // CACHE DATA KOMPONEN (Bab/Sub Bab)
