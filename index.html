@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Register</title>
+  <link rel="stylesheet" href="login-style.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <span>🔑 Login / Register</span>
+    </div>
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Masukkan Username">
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Masukkan Password">
+    </div>
+    <div class="btn-container">
+      <button class="btn btn-login" onclick="login()">Login</button>
+      <button class="btn btn-register" onclick="register()">Register</button>
+    </div>
+    <div class="register-link">
+      <a href="#">Belum punya akun? Register</a>
+    </div>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader-overlay" id="loader">
+    <div class="loader"></div>
+  </div>
+
+  <script src="login-script.js"></script>
+</body>
+</html>
