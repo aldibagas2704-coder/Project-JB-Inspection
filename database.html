@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>History Inspeksi Unit</title>
+  <link rel="stylesheet" href="database-style.css"/>
+</head>
+<body>
+  <main class="container">
+    <h1>History Inspeksi Unit</h1>
+
+    <div class="toolbar">
+      <input id="searchBox" type="text" placeholder="Cari kode unit / inspektor / tanggal / HM..." />
+      <button id="refreshBtn" title="Muat ulang">Refresh</button>
+    </div>
+
+    <div id="dbMessage" class="msg hidden">Memuat data…</div>
+
+    <div class="table-wrap">
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th>Kode Unit</th>
+            <th>Tanggal Inspeksi</th>
+            <th>Hour Meter</th>
+            <th>Inspektor</th>
+            <th>PDF</th><!-- kolom baru -->
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="database-script.js"></script>
+</body>
+</html>
