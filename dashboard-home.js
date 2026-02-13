@@ -2,7 +2,7 @@
 // DASHBOARD — Hari Ini + Grafik (tanpa Draft)
 // ==========================
 (() => {
-  const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
+  const WORKER_URL = "https://jb-inspection-27a4.aldibagas2704.workers.dev/";
   const AUTO_REFRESH_MS = 60_000;
 
   // ---------- UTIL ----------
