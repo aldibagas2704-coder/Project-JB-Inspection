@@ -1,7 +1,7 @@
 // ==========================
 // DATABASE — robust mapping (object/array) + dedupe
 // ==========================
-const WORKER_URL = "https://delicate-union-ad99.sayaryant.workers.dev/";
+const WORKER_URL = "https://jb-inspection-27a4.aldibagas2704.workers.dev/";
 
 const tbody      = document.querySelector("#data-table tbody");
 const searchBox  = document.getElementById("searchBox");
