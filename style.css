@@ -1,0 +1,198 @@
+/* ========================== */
+/* GLOBAL / BODY */
+/* ========================== */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0c1d3f, #1a3a70);
+  color: #e0e7ff;
+  margin: 0;
+  padding: 0;
+  transition: background 0.5s ease;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-weight: 600;
+  color: #e0e7ff;
+}
+
+/* ========================== */
+/* GLASS CARD / CONTAINER */
+/* ========================== */
+.glass-card, .form-container, #authContainer, #formContainer, #tableContainer {
+  background: rgba(12,29,63,0.9);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 25px;
+  margin-bottom: 25px;
+}
+
+.glass-card:hover, .form-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
+
+/* ========================== */
+/* HEADER GRADIENT */
+.header-gradient {
+  background: linear-gradient(90deg, #0d2a5c, #1fb4d3);
+  color: #e0e7ff;
+  text-align: center;
+  padding: 12px;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* ========================== */
+/* INPUT FIELD */
+.neon-input {
+  background: rgba(18,38,68,0.7);
+  border: 1px solid #1fb4d3;
+  color: #e0e7ff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  transition: all 0.3s ease;
+}
+
+.neon-input:focus {
+  border-color: #1fb4d3;
+  box-shadow: 0 0 8px #1fb4d3;
+  outline: none;
+}
+
+/* ========================== */
+/* BUTTONS */
+.btn-gradient {
+  background: linear-gradient(90deg,#0d2a5c,#1fb4d3);
+  border: none;
+  color: #e0e7ff;
+  font-weight: 600;
+  transition: all 0.3s ease, transform 0.2s ease;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn-gradient:hover, .btn-gradient:focus {
+  filter: brightness(1.1);
+  transform: translateY(-2px) scale(1.01);
+}
+
+.btn-gradient-dark {
+  background: linear-gradient(90deg,#0a1a34,#0f2245);
+  border: none;
+  color: #e0e7ff;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn-gradient-dark:hover, .btn-gradient-dark:focus {
+  filter: brightness(1.1);
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* ========================== */
+/* TABLE */
+.table-card {
+  background: rgba(12,29,63,0.85);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.table-head-gradient {
+  background: linear-gradient(90deg,#0d2a5c,#1fb4d3);
+  color: #e0e7ff;
+}
+
+/* ========================== */
+/* IMG PREVIEW */
+.img-preview {
+  max-width: 60px;
+  max-height: 60px;
+  margin-top: 5px;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+.img-preview:hover {
+  transform: scale(1.05);
+}
+
+/* ========================== */
+/* OVERLAY LOADING */
+#overlay {
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(12,29,63,0.75);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  text-align:center;
+  backdrop-filter: blur(4px);
+}
+
+#overlay p {
+  margin-top: 15px;
+  font-weight: 600;
+  font-size:1.3rem;
+  color: #e0e7ff;
+}
+
+/* ========================== */
+/* TABLE BORDER SUB ROW */
+.sub-row td {
+  border-left: 2px dashed #1fb4d3;
+}
+
+.no-border-left {
+  border-left: none !important;
+}
+
+/* ========================== */
+/* ALERT */
+.alert {
+  transition: all 0.3s ease;
+  text-align:center;
+  border-radius: 10px;
+  background: rgba(12,29,63,0.7);
+  border: 1px solid #1fb4d3;
+  color: #e0e7ff;
+}
+
+/* ========================== */
+/* SCROLLBAR */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1fb4d3;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+}
+
+/* ========================== */
+/* RESPONSIVE */
+@media(max-width:768px){
+  .row.g-3.mb-3 > .col-12.col-sm-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
