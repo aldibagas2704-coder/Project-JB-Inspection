@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jadwal Inspeksi</title>
+  <!-- Tambahkan query ?v=2 supaya cache browser refresh -->
+  <link rel="stylesheet" href="jadwal-style.css?v=2" />
+</head>
+<body>
+  <div class="container">
+
+    <h1>Jadwal Inspeksi</h1>
+
+    <!-- KARTU: Form Jadwal -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Input Jadwal</h2>
+      </div>
+
+      <form id="jadwalForm">
+        <label for="tanggal">Tanggal Inspeksi</label>
+        <input type="date" id="tanggal" name="tanggal" required />
+
+        <label for="kode">Kode Unit</label>
+        <input type="text" id="kode" name="kode" placeholder="Masukkan kode unit" required />
+
+        <label for="lokasi">Lokasi Unit</label>
+        <input type="text" id="lokasi" name="lokasi" placeholder="Masukkan lokasi unit" required />
+
+        <div class="actions" style="margin-top:12px">
+          <button type="submit" class="btn btn-primary">Simpan Jadwal</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- KARTU: Draft Jadwal -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Draft Jadwal (Belum Terkirim)</h2>
+        <div class="actions">
+          <button id="btnRefresh" type="button" class="btn">Refresh</button>
+          <button id="btnSubmitAll" type="button" class="btn btn-primary">Kirim Semua</button>
+        </div>
+      </div>
+
+      <div id="infoMsg" class="info hidden">Memuat data…</div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Kode Unit</th>
+              <th>Tanggal</th>
+              <th>Lokasi</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="draftTbody">
+            <tr><td colspan="5" class="muted">Tidak ada draft.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Overlay loading -->
+  <div id="loadingOverlay" class="overlay hidden">
+    <div class="loading">
+      <div class="spinner"></div>
+      Mengirim data, mohon tunggu...
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <script src="jadwal-script.js?v=2"></script>
+</body>
+</html>
