@@ -1,4 +1,4 @@
-const SCRIPT_URL = "https://delicate-union-ad99.sayaryant.workers.dev/"; // Cloudflare Worker
+const SCRIPT_URL = "https://jb-inspection-27a4.aldibagas2704.workers.dev/"; // Cloudflare Worker
 
 function showLoader(show) {
   document.getElementById("loader").style.display = show ? "flex" : "none";
