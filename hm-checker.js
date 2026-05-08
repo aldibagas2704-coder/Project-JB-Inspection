@@ -49,10 +49,20 @@ async function checkHMReminder() {
 
         console.log("=== HM CHECK START ===");
 
+        const checkedUnits = new Set();
+        
         data.forEach(row => {
 
             const unit =
                 row["Code Unit"];
+
+            // SKIP JIKA UNIT SUDAH DICEK
+            if (checkedUnits.has(unit)) {
+            return;
+            }
+
+            // TANDAI SUDAH DICEK
+            checkedUnits.add(unit);
 
             const currentHM =
                 Number(row["Hour Meter"]);
