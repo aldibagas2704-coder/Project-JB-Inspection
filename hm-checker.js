@@ -22,7 +22,7 @@ async function checkHMReminder() {
 
         // GANTI ACTION SESUAI YANG ADA DI SYSTEM EXISTING
         const result = await postWorker({
-            action: "getInspection"
+            action: "getInspeksi"
         });
 
         console.log("API RESULT:");
