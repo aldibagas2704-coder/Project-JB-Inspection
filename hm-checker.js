@@ -50,11 +50,11 @@ async function checkHMReminder() {
         const unitMaster = {
             "DZK20 027": {
                 interval: 500,
-                offset: 10
+                offset: 300
             },
             "HG200": {
                 interval: 250,
-                offset: 10
+                offset: 150
             }
         };
 
