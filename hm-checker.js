@@ -4,7 +4,7 @@ async function checkHMReminder() {
     try {
 
         // GANTI DENGAN URL API EXISTING KAMU
-        const response = await fetch("URL_API_KAMU");
+        const response = await fetch("https://jb-inspection-27a4.aldibagas2704.workers.dev/");
 
         const data = await response.json();
 
