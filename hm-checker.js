@@ -9,6 +9,7 @@ async function checkHMReminder() {
         const data = await response.json();
 
         console.log("Data inspection:", data);
+        console.log(JSON.stringify(data, null, 2));
 
         // SIMULASI UNIT MASTER
         const unitMaster = {
