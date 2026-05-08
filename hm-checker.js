@@ -1,8 +1,8 @@
 // hm-checker.js
 
-const WORKER_URL = "https://jb-inspection-27a4.aldibagas2704.workers.dev/";
+const WORKER_URL =
+"https://jb-inspection-27a4.aldibagas2704.workers.dev/";
 
-// FORMAT REQUEST EXISTING SYSTEM
 async function postWorker(payload) {
 
     const r = await fetch(WORKER_URL, {
@@ -20,58 +20,73 @@ async function checkHMReminder() {
 
     try {
 
-        // GANTI ACTION SESUAI YANG ADA DI SYSTEM EXISTING
         const result = await postWorker({
             action: "getInspeksi"
         });
 
-        console.log("API RESULT:");
-        console.log(result);
-
-        console.log("JSON RESULT:");
-        console.log(JSON.stringify(result, null, 2));
-
-        // CEK APAKAH SUCCESS
+        // VALIDASI
         if (!result.success) {
             console.error("API Error:", result.message);
             return;
         }
 
-        // AMBIL ARRAY DATA
         const data = result.data;
 
-        // CEK APAKAH ARRAY
-        if (!Array.isArray(data)) {
-            console.error("Data bukan array:", data);
-            return;
-        }
-
-        // SIMULASI UNIT MASTER
+        // UNIT MASTER TEST
         const unitMaster = {
+
             "DZK20 027": {
                 interval: 500,
                 offset: 300
             },
+
             "HG200": {
                 interval: 250,
                 offset: 150
             }
+
         };
+
+        console.log("=== HM CHECK START ===");
 
         data.forEach(row => {
 
-            const unit = row["Code Unit"];
-            const currentHM = Number(row["Hour Meter"]);
+            const unit =
+                row["Code Unit"];
 
-            // SKIP JIKA UNIT TIDAK ADA
-            if (!unitMaster[unit]) return;
+            const currentHM =
+                Number(row["Hour Meter"]);
 
-            const interval = unitMaster[unit].interval;
-            const offset = unitMaster[unit].offset;
+            // SKIP DATA KOSONG
+            if (!unit || !currentHM) return;
 
-            // HITUNG NEXT DUE HM
+            console.log("Checking unit:", unit);
+            console.log("Current HM:", currentHM);
+
+            // SKIP JIKA TIDAK ADA DI MASTER
+            if (!unitMaster[unit]) {
+
+                console.log(
+                    "Unit tidak ada di master:",
+                    unit
+                );
+
+                return;
+            }
+
+            const interval =
+                unitMaster[unit].interval;
+
+            const offset =
+                unitMaster[unit].offset;
+
+            // HITUNG DUE HM
             const dueHM =
-                Math.ceil(currentHM / interval) * interval;
+                Math.ceil(currentHM / interval)
+                * interval;
+
+            console.log("Due HM:", dueHM);
+            console.log("Threshold:", dueHM - offset);
 
             // CEK REMINDER
             if (currentHM >= (dueHM - offset)) {
@@ -85,17 +100,27 @@ Due HM    : ${dueHM}
 ========================
                 `);
 
+            } else {
+
+                console.log(
+                    "Belum masuk reminder"
+                );
+
             }
 
         });
 
-    } catch (error) {
+        console.log("=== HM CHECK END ===");
 
-        console.error("HM Checker Error:", error);
+    } catch(error) {
+
+        console.error(
+            "HM Checker Error:",
+            error
+        );
 
     }
 
 }
 
-// JALANKAN
 checkHMReminder();
