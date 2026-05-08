@@ -1,15 +1,50 @@
 // hm-checker.js
 
+const WORKER_URL = "https://jb-inspection-27a4.aldibagas2704.workers.dev/";
+
+// FORMAT REQUEST EXISTING SYSTEM
+async function postWorker(payload) {
+
+    const r = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    });
+
+    return await r.json();
+}
+
 async function checkHMReminder() {
+
     try {
 
-        // GANTI DENGAN URL API EXISTING KAMU
-        const response = await fetch("https://jb-inspection-27a4.aldibagas2704.workers.dev/");
+        // GANTI ACTION SESUAI YANG ADA DI SYSTEM EXISTING
+        const result = await postWorker({
+            action: "getInspection"
+        });
 
-        const data = await response.json();
+        console.log("API RESULT:");
+        console.log(result);
 
-        console.log("Data inspection:", data);
-        console.log(JSON.stringify(data, null, 2));
+        console.log("JSON RESULT:");
+        console.log(JSON.stringify(result, null, 2));
+
+        // CEK APAKAH SUCCESS
+        if (!result.success) {
+            console.error("API Error:", result.message);
+            return;
+        }
+
+        // AMBIL ARRAY DATA
+        const data = result.data;
+
+        // CEK APAKAH ARRAY
+        if (!Array.isArray(data)) {
+            console.error("Data bukan array:", data);
+            return;
+        }
 
         // SIMULASI UNIT MASTER
         const unitMaster = {
@@ -28,13 +63,15 @@ async function checkHMReminder() {
             const unit = row["Code Unit"];
             const currentHM = Number(row["Hour Meter"]);
 
+            // SKIP JIKA UNIT TIDAK ADA
             if (!unitMaster[unit]) return;
 
             const interval = unitMaster[unit].interval;
             const offset = unitMaster[unit].offset;
 
             // HITUNG NEXT DUE HM
-            const dueHM = Math.ceil(currentHM / interval) * interval;
+            const dueHM =
+                Math.ceil(currentHM / interval) * interval;
 
             // CEK REMINDER
             if (currentHM >= (dueHM - offset)) {
@@ -53,8 +90,11 @@ Due HM    : ${dueHM}
         });
 
     } catch (error) {
+
         console.error("HM Checker Error:", error);
+
     }
+
 }
 
 // JALANKAN
