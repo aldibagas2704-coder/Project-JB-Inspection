@@ -172,6 +172,27 @@ Send To   : ${email}
 ========================
                 `);
 
+fetch(API_URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    action: "sendReminderEmail",
+    unit: unit,
+    currentHM: currentHM,
+    dueHM: dueHM,
+    email: picEmail
+  })
+})
+.then(res => res.json())
+.then(result => {
+  console.log("EMAIL RESPONSE:", result);
+})
+.catch(err => {
+  console.error("EMAIL ERROR:", err);
+});
+             
             }
 
         });
