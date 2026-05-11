@@ -182,7 +182,7 @@ fetch("https://jb-inspection-27a4.aldibagas2704.workers.dev/", {
     unit: unit,
     currentHM: currentHM,
     dueHM: dueHM,
-    email: picEmail
+    email: email
   })
 })
 .then(res => res.json())
