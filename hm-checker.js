@@ -192,7 +192,42 @@ fetch("https://jb-inspection-27a4.aldibagas2704.workers.dev/", {
 .catch(err => {
   console.error("EMAIL ERROR:", err);
 });
-             
+
+fetch("https://jb-inspection-27a4.aldibagas2704.workers.dev/", {
+
+  method: "POST",
+
+  headers: {
+    "Content-Type": "application/json"
+  },
+
+  body: JSON.stringify({
+
+    action: "createAutoSchedule",
+
+    kode: unit,
+
+    lokasi: unitMaster[unit].site,
+
+    dueHM: dueHM,
+
+    tanggal: new Date().toISOString().split("T")[0]
+
+  })
+
+})
+.then(res => res.json())
+.then(result => {
+
+  console.log("AUTO SCHEDULE RESPONSE:", result);
+
+})
+.catch(err => {
+
+  console.error("AUTO SCHEDULE ERROR:", err);
+
+});
+                
             }
 
         });
