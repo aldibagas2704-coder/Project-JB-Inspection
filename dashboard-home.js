@@ -159,25 +159,20 @@
       if (twDateEl) twDateEl.textContent = `Hari ini: ${toDDMMYYYY(new Date())}`;
       twShowMsg("Memuat data…");
       ensureCharts();
-
       const res = await fetchJadwal();
       if (!res?.success || !Array.isArray(res.data)){
         twShowMsg(res?.message || "Gagal memuat data.");
         return;
       }
       twHideMsg();
-
       const rows = normalizeRows(res.data);
-
       // set default month (bulan ini) untuk grafik
       if (monthPicker && !monthPicker.value){
         const d = new Date();
         monthPicker.value = `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
       }
-
       renderToday(rows);
       updateMonthlyChart(rows);
-
       if (monthPicker){
         monthPicker.onchange = () => updateMonthlyChart(rows);
       }
@@ -185,9 +180,27 @@
       twShowMsg(`Gagal memuat: ${err.message}`);
     }
   }
-
   // init & auto refresh
   document.getElementById("tw-refresh")?.addEventListener("click", loadAll);
   loadAll();
   setInterval(loadAll, AUTO_REFRESH_MS);
 })();
+
+
+async function loadAnalytics(){
+  try{
+    const res = await postWorker({
+      action:'getDashboardAnalytics'
+    });
+    if(!res.success) return;
+    const data = res.data.data || res.data;
+    document.getElementById("totalInspection")
+      .innerText = data.totalInspection || 0;
+    document.getElementById("highPriority")
+      .innerText = data.highPriority || 0;
+    document.getElementById("compliance")
+      .innerText = (data.compliance || 0) + "%";
+  }catch(err){
+    console.log(err);
+  }
+}
