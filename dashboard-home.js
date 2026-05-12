@@ -183,6 +183,7 @@
   // init & auto refresh
   document.getElementById("tw-refresh")?.addEventListener("click", loadAll);
   loadAll();
+  loadAnalytics();
   setInterval(loadAll, AUTO_REFRESH_MS);
 })();
 
