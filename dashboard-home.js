@@ -429,4 +429,5 @@ loadAnalytics();
 }, AUTO_REFRESH_MS);
 
 window.postWorker = postWorker;
+
 })();
