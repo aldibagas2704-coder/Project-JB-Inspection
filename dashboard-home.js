@@ -21,7 +21,7 @@
   const dispFromYMD = ymd => ymd ? ymd.split("-").reverse().join("/") : "-";
   const daysInMonth = (y,m1_12)=> new Date(y, m1_12, 0).getDate();
 
-  async function postWorker(payload){
+  window.postWorker = async function(payload){
     const r = await fetch(WORKER_URL, {
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
