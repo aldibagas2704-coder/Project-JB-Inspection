@@ -78,3 +78,36 @@ button#tw-refresh:hover,.btn-primary:hover{ filter:brightness(1.06); }
   .small-chart{ height: 220px !important; }  /* di layar kecil */
 }
 
+
+.analytics-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+  margin-bottom:20px;
+}
+
+.analytics-card{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  color:white;
+  text-align:center;
+}
+
+.analytics-card h2{
+  font-size:32px;
+  margin:0;
+}
+
+.analytics-card p{
+  margin-top:10px;
+  opacity:.8;
+}
+
+.analytics-card.warning{
+  background:#dc2626;
+}
+
+.analytics-card.success{
+  background:#059669;
+}
