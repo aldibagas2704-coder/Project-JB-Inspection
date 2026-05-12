@@ -40,7 +40,7 @@ ymd ? ymd.split("-").reverse().join("/") : "-";
 const daysInMonth = (y,m1_12) =>
 new Date(y, m1_12, 0).getDate();
 
-window.postWorker = async function(payload){
+async function postWorker(payload){
 
 const r = await fetch(WORKER_URL, {
 method:'POST',
