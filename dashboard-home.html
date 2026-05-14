@@ -1,79 +1,265 @@
 <!doctype html>
 <html lang="id">
+
 <head>
+
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dashboard Utama</title>
-  <link rel="stylesheet" href="dashboard-home.css" />
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  />
+
+  <title>
+    Dashboard Utama
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="dashboard-home.css"
+  />
+
 </head>
+
 <body>
-  <h2>Dashboard Inspection Report PT Jhonlin Baratama</h2>
+
+  <h2>
+    Dashboard Inspection Report
+    PT Jhonlin Baratama
+  </h2>
+
+  <!-- ========================= -->
+  <!-- ANALYTICS -->
+  <!-- ========================= -->
 
   <section class="analytics-grid">
-  <div class="analytics-card">
-    <h2 id="totalInspection">0</h2>
-    <p>Total Inspection</p>
-  </div>
-  <div class="analytics-card warning">
-    <h2 id="highPriority">0</h2>
-    <p>High Priority</p>
-  </div>
-  <div class="analytics-card success">
-    <h2 id="compliance">0%</h2>
-    <p>Compliance</p>
-  </div>
-</section>
 
-  <!-- ====== GRAFIK (baru) ====== -->
+    <div class="analytics-card">
+
+      <h2 id="totalInspection">
+        0
+      </h2>
+
+      <p>
+        Total Inspection
+      </p>
+
+    </div>
+
+    <div class="analytics-card warning">
+
+      <h2 id="highPriority">
+        0
+      </h2>
+
+      <p>
+        High Priority
+      </p>
+
+    </div>
+
+    <div class="analytics-card success">
+
+      <h2 id="compliance">
+        0%
+      </h2>
+
+      <p>
+        Compliance
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- ========================= -->
+  <!-- DECISION MAKING -->
+  <!-- ========================= -->
+
+  <section class="decision-section">
+
+    <div class="decision-card">
+
+      <h3>
+        Maintenance Decision Recommendation
+      </h3>
+
+      <p id="decisionText">
+
+        Menunggu analisis...
+
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- ========================= -->
+  <!-- CHART -->
+  <!-- ========================= -->
+
   <section class="charts-grid">
+
     <div class="card">
+
       <div class="card-head">
-        <h3>Status Jadwal — Hari Ini</h3>
+
+        <h3>
+          Status Jadwal — Hari Ini
+        </h3>
+
       </div>
+
       <div class="card-body">
-        <canvas id="chartStatus" class="small-chart"></canvas>
+
+        <canvas
+          id="chartStatus"
+          class="small-chart"
+        ></canvas>
+
       </div>
+
     </div>
 
     <div class="card">
+
       <div class="card-head between">
-        <h3>Jadwal vs Selesai — Bulanan</h3>
+
+        <h3>
+          Jadwal vs Selesai — Bulanan
+        </h3>
+
         <div class="controls">
-          <input type="month" id="monthPicker" class="month">
+
+          <input
+            type="month"
+            id="monthPicker"
+            class="month"
+          >
+
         </div>
+
       </div>
+
       <div class="card-body">
-        <div id="monthSummary" class="muted">—</div>
-        <canvas id="chartMonthly" class="small-chart"></canvas>
+
+        <div
+          id="monthSummary"
+          class="muted"
+        >
+          —
+        </div>
+
+        <canvas
+          id="chartMonthly"
+          class="small-chart"
+        ></canvas>
+
       </div>
+
     </div>
+
   </section>
 
-  <!-- Widget: Jadwal Inspeksi Hari Ini (tetap) -->
+  <!-- ========================= -->
+  <!-- TODAY SCHEDULE -->
+  <!-- ========================= -->
+
   <section class="today-widget">
+
     <div class="tw-header">
-      <h3>Jadwal Inspeksi Hari Ini</h3>
+
+      <h3>
+        Jadwal Inspeksi Hari Ini
+      </h3>
+
       <div class="tw-meta">
-        <span id="tw-date">—</span>
-        <button id="tw-refresh" type="button">Refresh</button>
+
+        <span id="tw-date">
+          —
+        </span>
+
+        <button
+          id="tw-refresh"
+          type="button"
+        >
+          Refresh
+        </button>
+
       </div>
+
     </div>
-    <div id="tw-msg" class="tw-msg tw-hidden">Memuat data…</div>
+
+    <div
+      id="tw-msg"
+      class="tw-msg tw-hidden"
+    >
+      Memuat data…
+    </div>
+
     <div class="tw-tablewrap">
-      <table class="tw-table" id="tw-table">
+
+      <table
+        class="tw-table"
+        id="tw-table"
+      >
+
         <thead>
-          <tr><th>Kode Unit</th><th>Tanggal</th><th>Lokasi</th><th>Status</th></tr>
+
+          <tr>
+
+            <th>
+              Kode Unit
+            </th>
+
+            <th>
+              Tanggal
+            </th>
+
+            <th>
+              Lokasi
+            </th>
+
+            <th>
+              Status
+            </th>
+
+          </tr>
+
         </thead>
+
         <tbody id="tw-tbody">
-          <tr><td colspan="4" class="tw-muted">Memuat…</td></tr>
+
+          <tr>
+
+            <td colspan="4" class="tw-muted">
+
+              Memuat...
+
+            </td>
+
+          </tr>
+
         </tbody>
+
       </table>
+
     </div>
+
   </section>
 
-  <!-- Chart.js hanya untuk halaman ini -->
+  <!-- ========================= -->
+  <!-- CHART JS -->
+  <!-- ========================= -->
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- ========================= -->
+  <!-- SCRIPT -->
+  <!-- ========================= -->
+
   <script src="dashboard-home.js"></script>
   <script src="hm-checker.js"></script>
+
 </body>
 </html>
