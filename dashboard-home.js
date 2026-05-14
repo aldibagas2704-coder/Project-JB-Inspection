@@ -1,6 +1,6 @@
 (() => {
 
-const WORKER_URL = "https://jb-inspection-27a4.aldibagas2704.workers.dev/";
+const WORKER_URL = "https://script.google.com/macros/s/AKfycbwCqgzbtQYKkPHuElmJuqur8ZtmIRzq5M1N2jRZYVdWW1fls42R3jYRSYfe3QgYo_sm/exec";
 const AUTO_REFRESH_MS = 60000;
 
 const pad2 = n => String(n).padStart(2,'0');
