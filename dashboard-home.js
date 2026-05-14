@@ -577,6 +577,164 @@ async function loadAll(){
 
 }
 
+
+// ============================
+// DECISION MAKING
+// ============================
+
+function renderDecision(data){
+
+  const el =
+  document.getElementById("decisionContent");
+
+  if(!el) return;
+
+  let html = "";
+
+  // ======================
+  // COMPLIANCE
+  // ======================
+
+  if(data.compliance < 60){
+
+    html += `
+
+      <div class="decision-item decision-danger">
+
+        <b>Compliance Rendah</b><br>
+
+        Jadwal inspeksi yang selesai
+        masih di bawah 60%.
+        Disarankan melakukan evaluasi
+        terhadap kedisiplinan inspeksi
+        dan monitoring aktivitas unit.
+
+      </div>
+
+    `;
+
+  } else if(data.compliance < 85){
+
+    html += `
+
+      <div class="decision-item decision-warning">
+
+        <b>Compliance Cukup</b><br>
+
+        Tingkat penyelesaian inspeksi
+        sudah cukup baik namun masih
+        perlu peningkatan agar mencapai
+        target optimal.
+
+      </div>
+
+    `;
+
+  } else {
+
+    html += `
+
+      <div class="decision-item decision-good">
+
+        <b>Compliance Sangat Baik</b><br>
+
+        Sistem inspeksi berjalan optimal
+        dan tingkat penyelesaian jadwal
+        sudah sangat baik.
+
+      </div>
+
+    `;
+
+  }
+
+  // ======================
+  // HIGH PRIORITY
+  // ======================
+
+  if(data.highPriority >= 10){
+
+    html += `
+
+      <div class="decision-item decision-danger">
+
+        <b>High Priority Tinggi</b><br>
+
+        Ditemukan banyak temuan prioritas tinggi.
+        Disarankan segera melakukan
+        preventive maintenance dan
+        pengecekan unit kritikal.
+
+      </div>
+
+    `;
+
+  } else if(data.highPriority > 0){
+
+    html += `
+
+      <div class="decision-item decision-warning">
+
+        <b>Terdapat Temuan Prioritas Tinggi</b><br>
+
+        Beberapa unit memerlukan
+        perhatian khusus agar tidak
+        berkembang menjadi breakdown.
+
+      </div>
+
+    `;
+
+  } else {
+
+    html += `
+
+      <div class="decision-item decision-good">
+
+        <b>Tidak Ada High Priority</b><br>
+
+        Kondisi unit relatif aman
+        dan stabil untuk operasional.
+
+      </div>
+
+    `;
+
+  }
+
+  // ======================
+  // UPCOMING HM
+  // ======================
+
+  if(data.upcoming && data.upcoming.length){
+
+    data.upcoming.forEach(u => {
+
+      html += `
+
+        <div class="decision-item decision-warning">
+
+          <b>Upcoming Inspection HM</b><br>
+
+          Unit <b>${u.unit}</b>
+          mendekati interval inspeksi.
+          Current HM:
+          <b>${u.currentHM}</b>,
+          Due HM:
+          <b>${u.dueHM}</b>.
+
+        </div>
+
+      `;
+
+    });
+
+  }
+
+  el.innerHTML = html;
+
+}
+  
 // ============================
 // LOAD ANALYTICS
 // ============================
@@ -593,7 +751,6 @@ async function loadAnalytics(){
 
     if(!res.success) return;
 
-    // FIX
     const data = res.data;
 
     document.getElementById("totalInspection")
@@ -604,6 +761,12 @@ async function loadAnalytics(){
 
     document.getElementById("compliance")
       .innerText = (data.compliance || 0) + "%";
+
+    // ======================
+    // DECISION MAKING
+    // ======================
+
+    renderDecision(data);
 
   }catch(err){
 
