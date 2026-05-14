@@ -583,58 +583,31 @@ async function loadAll(){
 
 async function loadAnalytics(){
 
-  try {
+  try{
 
-    const res = await getWorker(
-      "getDashboardAnalytics"
-    );
+    const res = await postWorker({
+      action:'getDashboardAnalytics'
+    });
 
     console.log("ANALYTICS:", res);
 
     if(!res.success) return;
 
-    const data =
-    res.data || {};
+    // FIX
+    const data = res.data;
 
-    const totalEl =
-    document.getElementById(
-      "totalInspection"
-    );
+    document.getElementById("totalInspection")
+      .innerText = data.totalInspection || 0;
 
-    const highEl =
-    document.getElementById(
-      "highPriority"
-    );
+    document.getElementById("highPriority")
+      .innerText = data.highPriority || 0;
 
-    const complianceEl =
-    document.getElementById(
-      "compliance"
-    );
+    document.getElementById("compliance")
+      .innerText = (data.compliance || 0) + "%";
 
-    if(totalEl){
+  }catch(err){
 
-      totalEl.textContent =
-      data.totalInspection || 0;
-
-    }
-
-    if(highEl){
-
-      highEl.textContent =
-      data.highPriority || 0;
-
-    }
-
-    if(complianceEl){
-
-      complianceEl.textContent =
-      `${data.compliance || 0}%`;
-
-    }
-
-  } catch(err){
-
-    console.error(err);
+    console.log(err);
 
   }
 
