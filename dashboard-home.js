@@ -1,7 +1,7 @@
 (() => {
 
 const WORKER_URL =
-"https://script.google.com/macros/s/AKfycbwCqgzbtQYKkPHuElmJuqur8ZtmIRzq5M1N2jRZYVdWW1fls42R3jYRSYfe3QgYo_sm/exec";
+"https://jb-inspection-27a4.aldibagas2704.workers.dev/";
 
 const AUTO_REFRESH_MS = 60000;
 
@@ -9,7 +9,8 @@ const AUTO_REFRESH_MS = 60000;
 // HELPER
 // ============================
 
-const pad2 = n => String(n).padStart(2,'0');
+const pad2 = n =>
+String(n).padStart(2,'0');
 
 const toDDMMYYYY = d =>
 `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`;
@@ -39,8 +40,8 @@ const anyToYMD = v => {
   }
 
   const m =
-    /^(\d{2})\/(\d{2})\/(\d{4})$/
-    .exec(String(v).trim());
+  /^(\d{2})\/(\d{2})\/(\d{4})$/
+  .exec(String(v).trim());
 
   if (m) {
 
@@ -53,13 +54,15 @@ const anyToYMD = v => {
 };
 
 const dispFromYMD = ymd =>
-ymd ? ymd.split("-").reverse().join("/") : "-";
+ymd
+? ymd.split("-").reverse().join("/")
+: "-";
 
 const daysInMonth = (y,m1_12) =>
 new Date(y, m1_12, 0).getDate();
 
 // ============================
-// POST WORKER
+// FETCH API
 // ============================
 
 async function postWorker(payload){
@@ -80,15 +83,13 @@ async function postWorker(payload){
 
 }
 
-// ============================
-// FETCH JADWAL
-// ============================
+async function getWorker(action){
 
-async function fetchJadwal(){
+  const r = await fetch(
+    `${WORKER_URL}?action=${action}`
+  );
 
-  return await postWorker({
-    action:'getJadwal'
-  });
+  return await r.json();
 
 }
 
@@ -148,9 +149,9 @@ function ensureCharts(){
 
   if (typeof Chart === "undefined") return;
 
-  // =========================
+  // ======================
   // STATUS CHART
-  // =========================
+  // ======================
 
   const cs =
   document.getElementById("chartStatus");
@@ -193,9 +194,9 @@ function ensureCharts(){
 
   }
 
-  // =========================
+  // ======================
   // MONTHLY CHART
-  // =========================
+  // ======================
 
   const cm =
   document.getElementById("chartMonthly");
@@ -213,19 +214,13 @@ function ensureCharts(){
         datasets: [
 
           {
-
             label:"Jadwal",
-
             data:[]
-
           },
 
           {
-
             label:"Selesai",
-
             data:[]
-
           }
 
         ]
@@ -236,10 +231,12 @@ function ensureCharts(){
 
         maintainAspectRatio: false,
 
-        scales:{
+        scales: {
 
-          y:{
+          y: {
+
             beginAtZero:true
+
           }
 
         }
@@ -253,7 +250,121 @@ function ensureCharts(){
 }
 
 // ============================
-// UPDATE STATUS CHART
+// FETCH JADWAL
+// ============================
+
+async function fetchJadwal(){
+
+  return await postWorker({
+
+    action:'getJadwal'
+
+  });
+
+}
+
+// ============================
+// NORMALIZE DATA
+// ============================
+
+function normalizeRows(raw){
+
+  return raw.map(r => ({
+
+    kode :
+
+      r.kode ??
+      r["kode"] ??
+      r["kode unit"] ??
+      r["unit"] ??
+      r["Code Unit"] ??
+      "",
+
+    lokasi :
+
+      r.lokasi ??
+      r["lokasi"] ??
+      r["site"] ??
+      r["Site"] ??
+      "",
+
+    status :
+
+      (
+        r.status ??
+        r["status"] ??
+        ""
+      )
+      .toString()
+      .trim(),
+
+    tanggalYMD :
+
+      anyToYMD(
+
+        r.tanggal ??
+        r["tanggal"] ??
+        r["date"] ??
+        r["Date"] ??
+        ""
+
+      )
+
+  }))
+  .filter(x => !!x.tanggalYMD);
+
+}
+
+// ============================
+// RENDER TODAY
+// ============================
+
+function renderToday(rows){
+
+  const today = todayYMD();
+
+  const list = rows
+  .filter(r => r.tanggalYMD === today)
+  .sort((a,b)=>
+
+    String(a.kode)
+    .localeCompare(String(b.kode))
+
+  );
+
+  if (twTbody){
+
+    twTbody.innerHTML = list.length
+
+    ? list.map(r => `
+
+      <tr>
+        <td>${r.kode || '-'}</td>
+        <td>${dispFromYMD(r.tanggalYMD)}</td>
+        <td>${r.lokasi || '-'}</td>
+        <td>${r.status || ''}</td>
+      </tr>
+
+    `).join('')
+
+    : `
+
+      <tr>
+        <td colspan="4">
+          Tidak ada jadwal hari ini
+        </td>
+      </tr>
+
+    `;
+
+  }
+
+  updateStatusChart(list);
+
+}
+
+// ============================
+// STATUS CHART
 // ============================
 
 function updateStatusChart(todayRows){
@@ -296,7 +407,7 @@ function updateStatusChart(todayRows){
 }
 
 // ============================
-// UPDATE MONTHLY CHART
+// MONTHLY CHART
 // ============================
 
 function updateMonthlyChart(allRows){
@@ -333,17 +444,17 @@ function updateMonthlyChart(allRows){
     if (!r.tanggalYMD) continue;
 
     const [y,m,d] =
-    r.tanggalYMD.split('-').map(Number);
+    r.tanggalYMD
+    .split('-')
+    .map(Number);
 
     if (y===yy && m===mm){
 
       total[d-1] += 1;
 
       if (
-
         (r.status || "")
         .toLowerCase() === "selesai"
-
       ){
 
         done[d-1] += 1;
@@ -368,6 +479,7 @@ function updateMonthlyChart(allRows){
   if (monthSummary){
 
     monthSummary.textContent =
+
     `Total bulan ini: ${sumT} jadwal • Selesai: ${sumD} (${pct}%)`;
 
   }
@@ -379,105 +491,6 @@ function updateMonthlyChart(allRows){
   chartMonthly.data.datasets[1].data = done;
 
   chartMonthly.update();
-
-}
-
-// ============================
-// NORMALIZE DATA
-// ============================
-
-function normalizeRows(raw){
-
-  return raw.map(r => ({
-
-    kode :
-
-    r.kode ??
-    r["kode"] ??
-    r["kode unit"] ??
-    r["unit"] ??
-    "",
-
-    lokasi :
-
-    r.lokasi ??
-    r["lokasi"] ??
-    r["site"] ??
-    r["location"] ??
-    "",
-
-    status :
-
-    (r.status ?? r["status"] ?? "")
-    .toString()
-    .trim(),
-
-    tanggalYMD :
-
-    anyToYMD(
-
-      r.tanggal ??
-      r["tanggal"] ??
-      r["date"] ??
-      ""
-
-    )
-
-  }))
-
-  .filter(x => !!x.tanggalYMD);
-
-}
-
-// ============================
-// RENDER TODAY
-// ============================
-
-function renderToday(rows){
-
-  const today = todayYMD();
-
-  const list = rows
-
-  .filter(r =>
-    r.tanggalYMD === today
-  )
-
-  .sort((a,b)=>
-
-    String(a.kode)
-    .localeCompare(String(b.kode))
-
-  );
-
-  if (twTbody){
-
-    twTbody.innerHTML = list.length
-
-    ? list.map(r => `
-
-      <tr>
-        <td>${r.kode || '-'}</td>
-        <td>${dispFromYMD(r.tanggalYMD)}</td>
-        <td>${r.lokasi || '-'}</td>
-        <td>${r.status || ''}</td>
-      </tr>
-
-    `).join('')
-
-    : `
-
-      <tr>
-        <td colspan="4">
-          Tidak ada jadwal untuk hari ini.
-        </td>
-      </tr>
-
-    `;
-
-  }
-
-  updateStatusChart(list);
 
 }
 
@@ -503,17 +516,17 @@ async function loadAll(){
     const res =
     await fetchJadwal();
 
-    if (
+    console.log("JADWAL:", res);
 
+    if(
       !res?.success ||
       !Array.isArray(res.data)
-
     ){
 
       twShowMsg(
 
         res?.message ||
-        "Gagal memuat data."
+        "Gagal memuat data"
 
       );
 
@@ -527,15 +540,14 @@ async function loadAll(){
     normalizeRows(res.data);
 
     if (
-
       monthPicker &&
       !monthPicker.value
-
     ){
 
       const d = new Date();
 
       monthPicker.value =
+
       `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
 
     }
@@ -551,10 +563,14 @@ async function loadAll(){
 
     }
 
-  }catch(err){
+  } catch(err){
+
+    console.error(err);
 
     twShowMsg(
+
       `Gagal memuat: ${err.message}`
+
     );
 
   }
@@ -569,26 +585,31 @@ async function loadAnalytics(){
 
   try {
 
-    const res = await fetch(
-      `${WORKER_URL}?action=getDashboardAnalytics`
+    const res = await getWorker(
+      "getDashboardAnalytics"
     );
 
-    const json = await res.json();
+    console.log("ANALYTICS:", res);
 
-    console.log("Analytics:", json);
+    if(!res.success) return;
 
-    if(!json.success) return;
-
-    const data = json.data;
+    const data =
+    res.data || {};
 
     const totalEl =
-    document.getElementById("totalInspection");
+    document.getElementById(
+      "totalInspection"
+    );
 
     const highEl =
-    document.getElementById("highPriority");
+    document.getElementById(
+      "highPriority"
+    );
 
     const complianceEl =
-    document.getElementById("compliance");
+    document.getElementById(
+      "compliance"
+    );
 
     if(totalEl){
 
@@ -620,30 +641,23 @@ async function loadAnalytics(){
 }
 
 // ============================
-// REFRESH BUTTON
+// EVENT
 // ============================
 
 document
 .getElementById("tw-refresh")
-?.addEventListener("click", () => {
-
-  loadAll();
-
-  loadAnalytics();
-
-});
+?.addEventListener(
+  "click",
+  loadAll
+);
 
 // ============================
-// INIT
+// START
 // ============================
 
 loadAll();
 
 loadAnalytics();
-
-// ============================
-// AUTO REFRESH
-// ============================
 
 setInterval(() => {
 
@@ -652,10 +666,6 @@ setInterval(() => {
   loadAnalytics();
 
 }, AUTO_REFRESH_MS);
-
-// ============================
-// GLOBAL
-// ============================
 
 window.postWorker = postWorker;
 
