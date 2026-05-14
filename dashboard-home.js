@@ -431,3 +431,46 @@ loadAnalytics();
 window.postWorker = postWorker;
 
 })();
+
+
+async function loadAnalytics(){
+
+  try {
+
+    const res = await fetch(
+      `${WORKER_URL}?action=getDashboardAnalytics`
+    );
+
+    const json = await res.json();
+
+    if(!json.success) return;
+
+    const data = json.data;
+
+    const totalEl = document.getElementById("totalInspection");
+    const highEl = document.getElementById("highPriority");
+    const complianceEl = document.getElementById("complianceRate");
+
+    if(totalEl){
+      totalEl.textContent = data.totalInspection || 0;
+    }
+
+    if(highEl){
+      highEl.textContent = data.highPriority || 0;
+    }
+
+    if(complianceEl){
+      complianceEl.textContent = `${data.compliance || 0}%`;
+    }
+
+    console.log("Analytics loaded:", data);
+
+  } catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+loadAnalytics();
