@@ -1,7 +1,13 @@
 (() => {
 
-const WORKER_URL = "https://script.google.com/macros/s/AKfycbwCqgzbtQYKkPHuElmJuqur8ZtmIRzq5M1N2jRZYVdWW1fls42R3jYRSYfe3QgYo_sm/exec";
+const WORKER_URL =
+"https://script.google.com/macros/s/AKfycbwCqgzbtQYKkPHuElmJuqur8ZtmIRzq5M1N2jRZYVdWW1fls42R3jYRSYfe3QgYo_sm/exec";
+
 const AUTO_REFRESH_MS = 60000;
+
+// ============================
+// HELPER
+// ============================
 
 const pad2 = n => String(n).padStart(2,'0');
 
@@ -9,29 +15,41 @@ const toDDMMYYYY = d =>
 `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`;
 
 const todayYMD = () => {
-const d = new Date();
-return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+
+  const d = new Date();
+
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+
 };
 
 const anyToYMD = v => {
 
-if (!v) return "";
+  if (!v) return "";
 
-if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+    return v;
+  }
 
-const d = new Date(v);
+  const d = new Date(v);
 
-if (!isNaN(d)) {
-return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-}
+  if (!isNaN(d)) {
 
-const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(v).trim());
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 
-if (m) {
-return `${m[3]}-${m[2]}-${m[1]}`;
-}
+  }
 
-return "";
+  const m =
+    /^(\d{2})\/(\d{2})\/(\d{4})$/
+    .exec(String(v).trim());
+
+  if (m) {
+
+    return `${m[3]}-${m[2]}-${m[1]}`;
+
+  }
+
+  return "";
+
 };
 
 const dispFromYMD = ymd =>
@@ -40,398 +58,512 @@ ymd ? ymd.split("-").reverse().join("/") : "-";
 const daysInMonth = (y,m1_12) =>
 new Date(y, m1_12, 0).getDate();
 
+// ============================
+// POST WORKER
+// ============================
+
 async function postWorker(payload){
 
-const r = await fetch(WORKER_URL, {
-method:'POST',
-headers:{
-'Content-Type':'application/json'
-},
-body: JSON.stringify(payload)
-});
+  const r = await fetch(WORKER_URL, {
 
-return await r.json();
+    method:'POST',
 
-};
+    headers:{
+      'Content-Type':'application/json'
+    },
+
+    body: JSON.stringify(payload)
+
+  });
+
+  return await r.json();
+
+}
+
+// ============================
+// FETCH JADWAL
+// ============================
 
 async function fetchJadwal(){
 
-return await postWorker({
-action:'getJadwal'
-});
+  return await postWorker({
+    action:'getJadwal'
+  });
 
 }
 
-const twTbody = document.getElementById("tw-tbody");
-const twMsg = document.getElementById("tw-msg");
-const twDateEl = document.getElementById("tw-date");
+// ============================
+// ELEMENT
+// ============================
+
+const twTbody =
+document.getElementById("tw-tbody");
+
+const twMsg =
+document.getElementById("tw-msg");
+
+const twDateEl =
+document.getElementById("tw-date");
+
+const monthPicker =
+document.getElementById('monthPicker');
+
+const monthSummary =
+document.getElementById('monthSummary');
+
+let chartStatus;
+let chartMonthly;
+
+// ============================
+// MESSAGE
+// ============================
 
 function twShowMsg(t){
 
-if (twMsg){
-twMsg.textContent = t;
-twMsg.classList.remove('tw-hidden');
-}
+  if (twMsg){
+
+    twMsg.textContent = t;
+
+    twMsg.classList.remove('tw-hidden');
+
+  }
 
 }
 
 function twHideMsg(){
 
-if (twMsg){
-twMsg.classList.add('tw-hidden');
-}
+  if (twMsg){
+
+    twMsg.classList.add('tw-hidden');
+
+  }
 
 }
 
-const monthPicker = document.getElementById('monthPicker');
-const monthSummary = document.getElementById('monthSummary');
-
-let chartStatus;
-let chartMonthly;
+// ============================
+// CHART INIT
+// ============================
 
 function ensureCharts(){
 
-if (typeof Chart === "undefined") return;
+  if (typeof Chart === "undefined") return;
 
-const cs = document.getElementById("chartStatus");
+  // =========================
+  // STATUS CHART
+  // =========================
 
-if (!chartStatus && cs){
+  const cs =
+  document.getElementById("chartStatus");
 
-chartStatus = new Chart(cs, {
+  if (!chartStatus && cs){
 
-type: "doughnut",
+    chartStatus = new Chart(cs, {
 
-data: {
-labels: ["Selesai","Belum"],
-datasets: [{
-data: [0,0]
-}]
-},
+      type: "doughnut",
 
-options: {
-maintainAspectRatio: false,
-plugins: {
-legend: {
-position:"bottom"
+      data: {
+
+        labels: ["Selesai","Belum"],
+
+        datasets: [{
+
+          data: [0,0]
+
+        }]
+
+      },
+
+      options: {
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: {
+
+            position:"bottom"
+
+          }
+
+        }
+
+      }
+
+    });
+
+  }
+
+  // =========================
+  // MONTHLY CHART
+  // =========================
+
+  const cm =
+  document.getElementById("chartMonthly");
+
+  if (!chartMonthly && cm){
+
+    chartMonthly = new Chart(cm, {
+
+      type: "bar",
+
+      data: {
+
+        labels: [],
+
+        datasets: [
+
+          {
+
+            label:"Jadwal",
+
+            data:[]
+
+          },
+
+          {
+
+            label:"Selesai",
+
+            data:[]
+
+          }
+
+        ]
+
+      },
+
+      options: {
+
+        maintainAspectRatio: false,
+
+        scales:{
+
+          y:{
+            beginAtZero:true
+          }
+
+        }
+
+      }
+
+    });
+
+  }
+
 }
-}
-}
 
-});
-
-}
-
-const cm = document.getElementById("chartMonthly");
-
-if (!chartMonthly && cm){
-
-chartMonthly = new Chart(cm, {
-
-type: "bar",
-
-data: {
-labels: [],
-datasets: [
-{
-label:"Jadwal",
-data:[]
-},
-{
-label:"Selesai",
-data:[]
-}
-]
-},
-
-options: {
-
-maintainAspectRatio: false,
-
-scales:{
-y:{
-beginAtZero:true
-}
-}
-
-}
-
-});
-
-}
-
-}
+// ============================
+// UPDATE STATUS CHART
+// ============================
 
 function updateStatusChart(todayRows){
 
-if (!chartStatus) return;
+  if (!chartStatus) return;
 
-const c = {
-Selesai:0,
-Belum:0
-};
+  const c = {
 
-for (const r of todayRows){
+    Selesai:0,
+    Belum:0
 
-const s = (r.status || "").toLowerCase();
+  };
 
-if (s === "selesai"){
-c.Selesai++;
-} else {
-c.Belum++;
+  for (const r of todayRows){
+
+    const s =
+    (r.status || "").toLowerCase();
+
+    if (s === "selesai"){
+
+      c.Selesai++;
+
+    } else {
+
+      c.Belum++;
+
+    }
+
+  }
+
+  chartStatus.data.datasets[0].data = [
+
+    c.Selesai,
+    c.Belum
+
+  ];
+
+  chartStatus.update();
+
 }
 
-}
-
-chartStatus.data.datasets[0].data = [
-c.Selesai,
-c.Belum
-];
-
-chartStatus.update();
-
-}
+// ============================
+// UPDATE MONTHLY CHART
+// ============================
 
 function updateMonthlyChart(allRows){
 
-if (!chartMonthly || !monthPicker) return;
+  if (!chartMonthly || !monthPicker) return;
 
-const v = monthPicker.value;
+  const v = monthPicker.value;
 
-if (!/^\d{4}-\d{2}$/.test(v || "")) return;
+  if (!/^\d{4}-\d{2}$/.test(v || "")) return;
 
-const [yy,mm] = v.split('-').map(Number);
+  const [yy,mm] =
+  v.split('-').map(Number);
 
-const dim = daysInMonth(yy, mm);
+  const dim =
+  daysInMonth(yy, mm);
 
-const labels = Array.from(
-{length:dim},
-(_,i)=> String(i+1)
-);
+  const labels =
+  Array.from(
 
-const total = Array(dim).fill(0);
-const done = Array(dim).fill(0);
+    {length:dim},
 
-for (const r of allRows){
+    (_,i)=> String(i+1)
 
-if (!r.tanggalYMD) continue;
+  );
 
-const [y,m,d] = r.tanggalYMD.split('-').map(Number);
+  const total =
+  Array(dim).fill(0);
 
-if (y===yy && m===mm){
+  const done =
+  Array(dim).fill(0);
 
-total[d-1] += 1;
+  for (const r of allRows){
 
-if ((r.status || "").toLowerCase() === "selesai"){
-done[d-1] += 1;
+    if (!r.tanggalYMD) continue;
+
+    const [y,m,d] =
+    r.tanggalYMD.split('-').map(Number);
+
+    if (y===yy && m===mm){
+
+      total[d-1] += 1;
+
+      if (
+
+        (r.status || "")
+        .toLowerCase() === "selesai"
+
+      ){
+
+        done[d-1] += 1;
+
+      }
+
+    }
+
+  }
+
+  const sumT =
+  total.reduce((a,b)=>a+b,0);
+
+  const sumD =
+  done.reduce((a,b)=>a+b,0);
+
+  const pct =
+  sumT
+  ? Math.round(sumD/sumT*100)
+  : 0;
+
+  if (monthSummary){
+
+    monthSummary.textContent =
+    `Total bulan ini: ${sumT} jadwal • Selesai: ${sumD} (${pct}%)`;
+
+  }
+
+  chartMonthly.data.labels = labels;
+
+  chartMonthly.data.datasets[0].data = total;
+
+  chartMonthly.data.datasets[1].data = done;
+
+  chartMonthly.update();
+
 }
 
-}
-
-}
-
-const sumT = total.reduce((a,b)=>a+b,0);
-const sumD = done.reduce((a,b)=>a+b,0);
-
-const pct = sumT
-? Math.round(sumD/sumT*100)
-: 0;
-
-if (monthSummary){
-
-monthSummary.textContent =
-`Total bulan ini: ${sumT} jadwal • Selesai: ${sumD} (${pct}%)`;
-
-}
-
-chartMonthly.data.labels = labels;
-
-chartMonthly.data.datasets[0].data = total;
-chartMonthly.data.datasets[1].data = done;
-
-chartMonthly.update();
-
-}
+// ============================
+// NORMALIZE DATA
+// ============================
 
 function normalizeRows(raw){
 
-return raw.map(r => ({
+  return raw.map(r => ({
 
-kode :
-r.kode ??
-r["kode"] ??
-r["kode unit"] ??
-r["unit"] ??
-"",
+    kode :
 
-lokasi :
-r.lokasi ??
-r["lokasi"] ??
-r["site"] ??
-r["location"] ??
-"",
+    r.kode ??
+    r["kode"] ??
+    r["kode unit"] ??
+    r["unit"] ??
+    "",
 
-status :
-(r.status ?? r["status"] ?? "")
-.toString()
-.trim(),
+    lokasi :
 
-tanggalYMD :
-anyToYMD(
-r.tanggal ??
-r["tanggal"] ??
-r["date"] ??
-""
-)
+    r.lokasi ??
+    r["lokasi"] ??
+    r["site"] ??
+    r["location"] ??
+    "",
 
-}))
-.filter(x => !!x.tanggalYMD);
+    status :
+
+    (r.status ?? r["status"] ?? "")
+    .toString()
+    .trim(),
+
+    tanggalYMD :
+
+    anyToYMD(
+
+      r.tanggal ??
+      r["tanggal"] ??
+      r["date"] ??
+      ""
+
+    )
+
+  }))
+
+  .filter(x => !!x.tanggalYMD);
 
 }
+
+// ============================
+// RENDER TODAY
+// ============================
 
 function renderToday(rows){
 
-const today = todayYMD();
+  const today = todayYMD();
 
-const list = rows
-.filter(r => r.tanggalYMD === today)
-.sort((a,b)=>
-String(a.kode)
-.localeCompare(String(b.kode))
-);
+  const list = rows
 
-if (twTbody){
+  .filter(r =>
+    r.tanggalYMD === today
+  )
 
-twTbody.innerHTML = list.length
+  .sort((a,b)=>
 
-? list.map(r => `
-<tr>
-<td>${r.kode || '-'}</td>
-<td>${dispFromYMD(r.tanggalYMD)}</td>
-<td>${r.lokasi || '-'}</td>
-<td>${r.status || ''}</td>
-</tr>
-`).join('')
+    String(a.kode)
+    .localeCompare(String(b.kode))
 
-: `
-<tr>
-<td colspan="4">
-Tidak ada jadwal untuk hari ini.
-</td>
-</tr>
-`;
+  );
+
+  if (twTbody){
+
+    twTbody.innerHTML = list.length
+
+    ? list.map(r => `
+
+      <tr>
+        <td>${r.kode || '-'}</td>
+        <td>${dispFromYMD(r.tanggalYMD)}</td>
+        <td>${r.lokasi || '-'}</td>
+        <td>${r.status || ''}</td>
+      </tr>
+
+    `).join('')
+
+    : `
+
+      <tr>
+        <td colspan="4">
+          Tidak ada jadwal untuk hari ini.
+        </td>
+      </tr>
+
+    `;
+
+  }
+
+  updateStatusChart(list);
+
 }
 
-updateStatusChart(list);
-
-}
+// ============================
+// LOAD ALL
+// ============================
 
 async function loadAll(){
 
-try{
+  try{
 
-if (twDateEl){
-twDateEl.textContent =
-`Hari ini: ${toDDMMYYYY(new Date())}`;
-}
+    if (twDateEl){
 
-twShowMsg("Memuat data...");
+      twDateEl.textContent =
+      `Hari ini: ${toDDMMYYYY(new Date())}`;
 
-ensureCharts();
+    }
 
-const res = await fetchJadwal();
+    twShowMsg("Memuat data...");
 
-if (!res?.success || !Array.isArray(res.data)){
+    ensureCharts();
 
-twShowMsg(
-res?.message || "Gagal memuat data."
-);
+    const res =
+    await fetchJadwal();
 
-return;
-}
+    if (
 
-twHideMsg();
+      !res?.success ||
+      !Array.isArray(res.data)
 
-const rows = normalizeRows(res.data);
+    ){
 
-if (monthPicker && !monthPicker.value){
+      twShowMsg(
 
-const d = new Date();
+        res?.message ||
+        "Gagal memuat data."
 
-monthPicker.value =
-`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+      );
 
-}
+      return;
 
-renderToday(rows);
+    }
 
-updateMonthlyChart(rows);
+    twHideMsg();
 
-if (monthPicker){
+    const rows =
+    normalizeRows(res.data);
 
-monthPicker.onchange = () =>
-updateMonthlyChart(rows);
+    if (
 
-}
+      monthPicker &&
+      !monthPicker.value
 
-}catch(err){
+    ){
 
-twShowMsg(`Gagal memuat: ${err.message}`);
+      const d = new Date();
 
-}
+      monthPicker.value =
+      `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
 
-}
+    }
 
-async function loadAnalytics(){
+    renderToday(rows);
 
-try{
+    updateMonthlyChart(rows);
 
-const res = await postWorker({
-action:'getDashboardAnalytics'
-});
+    if (monthPicker){
 
-console.log(res);
+      monthPicker.onchange = () =>
+      updateMonthlyChart(rows);
 
-if(!res.success) return;
+    }
 
-const data = res.data.data || res.data;
+  }catch(err){
 
-document.getElementById("totalInspection")
-.innerText = data.totalInspection || 0;
+    twShowMsg(
+      `Gagal memuat: ${err.message}`
+    );
 
-document.getElementById("highPriority")
-.innerText = data.highPriority || 0;
-
-document.getElementById("compliance")
-.innerText = (data.compliance || 0) + "%";
-
-}catch(err){
-
-console.log(err);
+  }
 
 }
 
-}
-
-document
-.getElementById("tw-refresh")
-?.addEventListener("click", loadAll);
-
-loadAll();
-
-loadAnalytics();
-
-setInterval(() => {
-
-loadAll();
-
-loadAnalytics();
-
-}, AUTO_REFRESH_MS);
-
-window.postWorker = postWorker;
-
-})();
-
+// ============================
+// LOAD ANALYTICS
+// ============================
 
 async function loadAnalytics(){
 
@@ -443,27 +575,41 @@ async function loadAnalytics(){
 
     const json = await res.json();
 
+    console.log("Analytics:", json);
+
     if(!json.success) return;
 
     const data = json.data;
 
-    const totalEl = document.getElementById("totalInspection");
-    const highEl = document.getElementById("highPriority");
-    const complianceEl = document.getElementById("compliance");
+    const totalEl =
+    document.getElementById("totalInspection");
+
+    const highEl =
+    document.getElementById("highPriority");
+
+    const complianceEl =
+    document.getElementById("compliance");
 
     if(totalEl){
-      totalEl.textContent = data.totalInspection || 0;
+
+      totalEl.textContent =
+      data.totalInspection || 0;
+
     }
 
     if(highEl){
-      highEl.textContent = data.highPriority || 0;
+
+      highEl.textContent =
+      data.highPriority || 0;
+
     }
 
     if(complianceEl){
-      complianceEl.textContent = `${data.compliance || 0}%`;
-    }
 
-    console.log("Analytics loaded:", data);
+      complianceEl.textContent =
+      `${data.compliance || 0}%`;
+
+    }
 
   } catch(err){
 
@@ -473,4 +619,44 @@ async function loadAnalytics(){
 
 }
 
+// ============================
+// REFRESH BUTTON
+// ============================
+
+document
+.getElementById("tw-refresh")
+?.addEventListener("click", () => {
+
+  loadAll();
+
+  loadAnalytics();
+
+});
+
+// ============================
+// INIT
+// ============================
+
+loadAll();
+
 loadAnalytics();
+
+// ============================
+// AUTO REFRESH
+// ============================
+
+setInterval(() => {
+
+  loadAll();
+
+  loadAnalytics();
+
+}, AUTO_REFRESH_MS);
+
+// ============================
+// GLOBAL
+// ============================
+
+window.postWorker = postWorker;
+
+})();
