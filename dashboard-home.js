@@ -449,7 +449,7 @@ async function loadAnalytics(){
 
     const totalEl = document.getElementById("totalInspection");
     const highEl = document.getElementById("highPriority");
-    const complianceEl = document.getElementById("complianceRate");
+    const complianceEl = document.getElementById("compliance");
 
     if(totalEl){
       totalEl.textContent = data.totalInspection || 0;
