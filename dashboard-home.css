@@ -111,3 +111,39 @@ button#tw-refresh:hover,.btn-primary:hover{ filter:brightness(1.06); }
 .analytics-card.success{
   background:#059669;
 }
+
+
+.decision-section{
+  margin-top:20px;
+}
+
+.decision-card{
+  background:#fff;
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.decision-card h3{
+  margin-bottom:15px;
+}
+
+.decision-item{
+  padding:12px;
+  border-left:5px solid #ff9800;
+  background:#f9f9f9;
+  margin-bottom:10px;
+  border-radius:8px;
+}
+
+.decision-good{
+  border-left-color:#4caf50;
+}
+
+.decision-danger{
+  border-left-color:#f44336;
+}
+
+.decision-warning{
+  border-left-color:#ff9800;
+}
