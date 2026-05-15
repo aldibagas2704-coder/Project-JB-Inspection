@@ -168,7 +168,14 @@ function ensureCharts(){
 
         datasets: [{
 
-          data: [0,0]
+          data: [0,0],
+
+          backgroundColor: [
+            "#10b981",
+            "#ef4444"
+          ],
+
+          borderWidth: 0
 
         }]
 
@@ -182,7 +189,11 @@ function ensureCharts(){
 
           legend: {
 
-            position:"bottom"
+            position:"bottom",
+
+            labels:{
+              color:"#ffffff"
+            }
 
           }
 
@@ -215,12 +226,14 @@ function ensureCharts(){
 
           {
             label:"Jadwal",
-            data:[]
+            data:[],
+            backgroundColor:"#38bdf8"
           },
 
           {
             label:"Selesai",
-            data:[]
+            data:[],
+            backgroundColor:"#10b981"
           }
 
         ]
@@ -231,12 +244,40 @@ function ensureCharts(){
 
         maintainAspectRatio: false,
 
+        responsive:true,
+
+        plugins:{
+          legend:{
+            labels:{
+              color:"#ffffff"
+            }
+          }
+        },
+
         scales: {
 
           y: {
 
-            beginAtZero:true
+            beginAtZero:true,
 
+            ticks:{
+              color:"#ffffff"
+            },
+
+            grid:{
+              color:"rgba(255,255,255,0.08)"
+            }
+
+          },
+
+          x:{
+            ticks:{
+              color:"#ffffff"
+            },
+
+            grid:{
+              color:"rgba(255,255,255,0.05)"
+            }
           }
 
         }
@@ -271,44 +312,19 @@ function normalizeRows(raw){
 
   return raw.map(r => ({
 
-    kode :
+    kode : r.kode || "",
 
-      r.kode ??
-      r["kode"] ??
-      r["kode unit"] ??
-      r["unit"] ??
-      r["Code Unit"] ??
-      "",
-
-    lokasi :
-
-      r.lokasi ??
-      r["lokasi"] ??
-      r["site"] ??
-      r["Site"] ??
-      "",
+    lokasi : r.lokasi || "",
 
     status :
 
-      (
-        r.status ??
-        r["status"] ??
-        ""
-      )
+      (r.status || "")
       .toString()
       .trim(),
 
     tanggalYMD :
 
-      anyToYMD(
-
-        r.tanggal ??
-        r["tanggal"] ??
-        r["date"] ??
-        r["Date"] ??
-        ""
-
-      )
+      anyToYMD(r.tanggal || "")
 
   }))
   .filter(x => !!x.tanggalYMD);
@@ -577,7 +593,6 @@ async function loadAll(){
 
 }
 
-
 // ============================
 // DECISION MAKING
 // ============================
@@ -585,7 +600,7 @@ async function loadAll(){
 function renderDecision(data){
 
   const el =
-  document.getElementById("decisionContent");
+  document.getElementById("decisionContainer");
 
   if(!el) return;
 
@@ -734,7 +749,7 @@ function renderDecision(data){
   el.innerHTML = html;
 
 }
-  
+
 // ============================
 // LOAD ANALYTICS
 // ============================
@@ -753,18 +768,35 @@ async function loadAnalytics(){
 
     const data = res.data;
 
-    document.getElementById("totalInspection")
-      .innerText = data.totalInspection || 0;
+    const totalInspection =
+    document.getElementById("totalInspection");
 
-    document.getElementById("highPriority")
-      .innerText = data.highPriority || 0;
+    const highPriority =
+    document.getElementById("highPriority");
 
-    document.getElementById("compliance")
-      .innerText = (data.compliance || 0) + "%";
+    const compliance =
+    document.getElementById("compliance");
 
-    // ======================
-    // DECISION MAKING
-    // ======================
+    if(totalInspection){
+
+      totalInspection.innerText =
+      data.totalInspection || 0;
+
+    }
+
+    if(highPriority){
+
+      highPriority.innerText =
+      data.highPriority || 0;
+
+    }
+
+    if(compliance){
+
+      compliance.innerText =
+      (data.compliance || 0) + "%";
+
+    }
 
     renderDecision(data);
 
