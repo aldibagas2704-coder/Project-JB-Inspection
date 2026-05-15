@@ -791,17 +791,21 @@ document
 // START
 // ============================
 
-loadAll();
-
-loadAnalytics();
-
-setInterval(() => {
+window.addEventListener("DOMContentLoaded", () => {
 
   loadAll();
 
   loadAnalytics();
 
-}, AUTO_REFRESH_MS);
+  setInterval(() => {
+
+    loadAll();
+
+    loadAnalytics();
+
+  }, AUTO_REFRESH_MS);
+
+});
 
 window.postWorker = postWorker;
 
