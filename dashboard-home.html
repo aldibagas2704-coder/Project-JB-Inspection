@@ -16,12 +16,16 @@
 
   <link
     rel="stylesheet"
-    href="dashboard-home.css"
+    href="dashboard-home.css?v=3"
   />
 
 </head>
 
 <body>
+
+  <!-- ========================= -->
+  <!-- TITLE -->
+  <!-- ========================= -->
 
   <h2>
     Dashboard Inspection Report
@@ -72,39 +76,28 @@
 
   </section>
 
-  <section class="decision-section">
-
-  <div class="decision-card" id="decisionCard">
-
-    <h3>Decision Making Recommendation</h3>
-
-    <div id="decisionContent">
-
-      <p>Memuat analisis...</p>
-
-    </div>
-
-  </div>
-
-</section>
-
   <!-- ========================= -->
   <!-- DECISION MAKING -->
   <!-- ========================= -->
 
   <section class="decision-section">
 
-    <div class="decision-card">
+    <div
+      class="decision-card"
+      id="decisionCard"
+    >
 
       <h3>
-        Maintenance Decision Recommendation
+        Decision Making Recommendation
       </h3>
 
-      <p id="decisionText">
+      <div id="decisionContent">
 
-        Menunggu analisis...
+        <p>
+          Memuat analisis...
+        </p>
 
-      </p>
+      </div>
 
     </div>
 
@@ -115,6 +108,8 @@
   <!-- ========================= -->
 
   <section class="charts-grid">
+
+    <!-- STATUS CHART -->
 
     <div class="card">
 
@@ -136,6 +131,8 @@
       </div>
 
     </div>
+
+    <!-- MONTHLY CHART -->
 
     <div class="card">
 
@@ -206,12 +203,16 @@
 
     </div>
 
+    <!-- MESSAGE -->
+
     <div
       id="tw-msg"
       class="tw-msg tw-hidden"
     >
       Memuat data…
     </div>
+
+    <!-- TABLE -->
 
     <div class="tw-tablewrap">
 
@@ -248,7 +249,10 @@
 
           <tr>
 
-            <td colspan="4" class="tw-muted">
+            <td
+              colspan="4"
+              class="tw-muted"
+            >
 
               Memuat...
 
@@ -271,11 +275,22 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <!-- ========================= -->
-  <!-- SCRIPT -->
+  <!-- MAIN SCRIPT -->
   <!-- ========================= -->
 
-  <script src="dashboard-home.js"></script>
+  <script src="dashboard-home.js?v=3"></script>
+
+  <!-- ========================= -->
+  <!-- OPTIONAL SCRIPT -->
+  <!-- ========================= -->
+
+  <!--
+  Aktifkan jika file hm-checker.js memang ada
+  -->
+
+  <!--
   <script src="hm-checker.js"></script>
+  -->
 
 </body>
 </html>
