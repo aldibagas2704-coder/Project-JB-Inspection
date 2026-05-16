@@ -548,7 +548,7 @@ document.addEventListener(
 
     const items = [];
 
-    rows.forEach(row => {
+    for (const row of rows) {
 
       const babSel =
         row.querySelector(
@@ -560,51 +560,86 @@ document.addEventListener(
           'select[name="subBab[]"]'
         );
 
-      items.push({
+      const fileInput =
+  row.querySelector(
+    'input[name="file[]"]'
+  );
 
-        description:
-          row.querySelector(
-            'input[name="description[]"]'
-          )?.value || "",
+const file =
+  fileInput?.files?.[0];
 
-        condition:
-          row.querySelector(
-            'input[name="condition[]"]'
-          )?.value || "",
+items.push({
 
-        partNumber:
-          row.querySelector(
-            'input[name="partNumber[]"]'
-          )?.value || "",
+  description:
+    row.querySelector(
+      'input[name="description[]"]'
+    )?.value || "",
 
-        namaBarang:
-          row.querySelector(
-            'input[name="namaBarang[]"]'
-          )?.value || "",
+  condition:
+    row.querySelector(
+      'input[name="condition[]"]'
+    )?.value || "",
 
-        qty:
-          row.querySelector(
-            'input[name="qty[]"]'
-          )?.value || "",
+  partNumber:
+    row.querySelector(
+      'input[name="partNumber[]"]'
+    )?.value || "",
 
-        satuan:
-          row.querySelector(
-            'input[name="satuan[]"]'
-          )?.value || "",
+  namaBarang:
+    row.querySelector(
+      'input[name="namaBarang[]"]'
+    )?.value || "",
 
-        bab:
-          babSel?.value || "",
+  qty:
+    row.querySelector(
+      'input[name="qty[]"]'
+    )?.value || "",
 
-        subBab:
-          subSel?.value || "",
+  satuan:
+    row.querySelector(
+      'input[name="satuan[]"]'
+    )?.value || "",
 
-        subCode:
-          subSel?.selectedOptions?.[0]
-          ?.dataset?.code || ""
+  bab:
+    babSel?.value || "",
 
-      });
+  subBab:
+    subSel?.value || "",
 
-    });
+  subCode:
+    subSel?.selectedOptions?.[0]
+    ?.dataset?.code || "",
+
+  masukFPB:
+    row.querySelector(
+      'input[name="masukFPB[]"]'
+    )?.checked || false,
+
+  fileName:
+    file?.name || "",
+
+  file:
+    await new Promise(resolve => {
+
+      if(!file){
+
+        resolve("");
+
+        return;
+
+      }
+
+      const reader =
+        new FileReader();
+
+      reader.onload = e =>
+        resolve(e.target.result);
+
+      reader.readAsDataURL(file);
+
+    })
+
+}
 
     const payload = {
 
