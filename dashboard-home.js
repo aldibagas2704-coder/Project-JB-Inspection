@@ -600,7 +600,7 @@ async function loadAll(){
 function renderDecision(data){
 
   const el =
-  document.getElementById("decisionContainer");
+document.getElementById("decisionContent");
 
   if(!el) return;
 
