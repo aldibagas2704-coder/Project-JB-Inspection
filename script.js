@@ -38,9 +38,11 @@ async function fetchKomponen() {
 
     console.log("DATA KOMPONEN:", j);
 
-    if (!j?.success || !Array.isArray(j.data)) {
+    if (!j.success || !Array.isArray(j.data)) {
 
-      throw new Error(j?.message || "Gagal load komponen");
+      throw new Error(
+        j.message || "Gagal load komponen"
+      );
 
     }
 
@@ -48,31 +50,28 @@ async function fetchKomponen() {
 
     j.data.forEach(r => {
 
-      const group =
-        (
-          r["Component Group"] ??
-          r["component group"] ??
-          r.componentGroup ??
-          r.group ??
-          ""
-        ).toString().trim();
+      // ==========================
+      // AMBIL DATA SESUAI HEADER SHEET
+      // ==========================
 
-      const sub =
-        (
-          r["Sub Component"] ??
-          r["sub component"] ??
-          r.subComponent ??
-          r.sub ??
-          ""
-        ).toString().trim();
+      const group = String(
+        r["COMPONENT GROUP"] || ""
+      ).trim();
 
-      const code =
-        (
-          r["Code"] ??
-          r["code"] ??
-          r.kode ??
-          ""
-        ).toString().trim();
+      const sub = String(
+        r["SUB COMPONENT"] || ""
+      ).trim();
+
+      const code = String(
+        r["CODE"] || ""
+      ).trim();
+
+      // debug
+      console.log({
+        group,
+        sub,
+        code
+      });
 
       if (!group || !sub) return;
 
@@ -83,24 +82,27 @@ async function fetchKomponen() {
       }
 
       byGroup[group].push({
+
         name: sub,
-        code
+        code: code
+
       });
 
     });
 
     KOM_DATA.groups =
-      Object.keys(byGroup).sort((a,b)=>
-        a.localeCompare(b)
-      );
+      Object.keys(byGroup).sort();
 
     KOM_DATA.byGroup = byGroup;
 
-    console.log("KOM_DATA:", KOM_DATA);
+    console.log("FINAL KOM DATA:", KOM_DATA);
 
   } catch(err) {
 
-    console.error("ERROR FETCH KOMPONEN:", err);
+    console.error(
+      "ERROR FETCH KOMPONEN:",
+      err
+    );
 
     KOM_DATA = {
       groups: [],
