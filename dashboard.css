@@ -114,6 +114,17 @@ body {
 .brand h2{ margin:0; }
 
 
+#iframe-content{
+  width:100%;
+  height:100%;
+  border:none;
+  display:block;
+  pointer-events:auto;
+}
 
+.content{
+  flex:1;
+  overflow:hidden;
+}
 
 
