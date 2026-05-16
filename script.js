@@ -111,7 +111,7 @@ async function fetchKomponen() {
 
   }
 
-}
+});
 
 // ==========================
 // FILL BAB
