@@ -517,34 +517,75 @@ document.addEventListener(
 
     row.innerHTML = `
 
-      <td colspan="10">
+  <td></td>
 
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Catatan FPB..."
-        >
+  <td></td>
 
-      </td>
+  <td></td>
 
-      <td class="text-center">
+  <td>
+    <input
+      type="text"
+      name="partNumberFPB[]"
+      class="form-control"
+    >
+  </td>
 
-        <button
-          type="button"
-          class="
-            btn
-            btn-danger
-            btn-sm
-            removeRowBtn
-          "
-        >
-          Hapus
-        </button>
+  <td>
+    <input
+      type="text"
+      name="namaBarangFPB[]"
+      class="form-control"
+    >
+  </td>
 
-      </td>
+  <td>
+    <input
+      type="number"
+      name="qtyFPB[]"
+      class="form-control"
+    >
+  </td>
 
-    `;
+  <td>
+    <input
+      type="text"
+      name="satuanFPB[]"
+      class="form-control"
+    >
+  </td>
 
+  <td></td>
+
+  <td></td>
+
+  <td class="text-center">
+
+    <input
+      type="checkbox"
+      checked
+      name="masukFPBRow[]"
+    >
+
+  </td>
+
+  <td class="text-center">
+
+    <button
+      type="button"
+      class="
+        btn
+        btn-danger
+        btn-sm
+        removeRowBtn
+      "
+    >
+      Hapus
+    </button>
+
+  </td>
+
+`;
     itemsTableBody.appendChild(row);
 
     row.querySelector(
