@@ -840,6 +840,6 @@ document.addEventListener(
 
     }
 
-  );
+   });
 
 });
