@@ -589,23 +589,23 @@ document.addEventListener(
   }
 
     
-  // ==========================
-  // LOAD KOMPONEN
-  // ==========================
-  fetchKomponen()
-  .then(() => {
+ // ==========================
+// DEFAULT ROW
+// ==========================
+addRow();
 
-    document
-      .querySelectorAll(".babSelect")
-      .forEach(fillBabOptions);
+// ==========================
+// LOAD KOMPONEN
+// ==========================
+fetchKomponen()
+.then(() => {
 
-  })
-  .catch(console.error);
- 
-  // ==========================
-  // DEFAULT ROW
-  // ==========================
-  addRow();
+  document
+    .querySelectorAll(".babSelect")
+    .forEach(fillBabOptions);
+
+})
+.catch(console.error);
 
   // ==========================
   // BUTTON TAMBAH ROW
