@@ -592,15 +592,15 @@ document.addEventListener(
   // ==========================
   // LOAD KOMPONEN
   // ==========================
-  try {
+  fetchKomponen()
+  .then(() => {
 
-  await fetchKomponen();
+    document
+      .querySelectorAll(".babSelect")
+      .forEach(fillBabOptions);
 
-} catch(err) {
-
-  console.error(err);
-
-}
+  })
+  .catch(console.error);
  
   // ==========================
   // DEFAULT ROW
