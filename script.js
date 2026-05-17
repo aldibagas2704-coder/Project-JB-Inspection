@@ -714,93 +714,128 @@ fetchKomponen()
 
       for (const row of rows) {
 
-        const fileInput =
-          row.querySelector(
-            'input[name="file[]"]'
-          );
+  // =========================
+  // MAIN ROW
+  // =========================
+  if (row.classList.contains("main-row")) {
 
-        let imageBase64 = "";
+    const babSel =
+      row.querySelector(
+        'select[name="bab[]"]'
+      );
 
-        if (
-          fileInput?.files?.[0]
-        ) {
+    const subSel =
+      row.querySelector(
+        'select[name="subBab[]"]'
+      );
 
-          imageBase64 =
-            await fileToBase64(
-              fileInput.files[0]
-            );
+    items.push({
 
-        }
+      description:
+        row.querySelector(
+          'input[name="description[]"]'
+        )?.value || "",
 
-        const babSel =
-          row.querySelector(
-            'select[name="bab[]"]'
-          );
+      condition:
+        row.querySelector(
+          'input[name="condition[]"]'
+        )?.value || "",
 
-        const subSel =
-          row.querySelector(
-            'select[name="subBab[]"]'
-          );
+      file:
+        row.querySelector(".img-preview")
+        ?.src || "",
 
-        items.push({
+      fileName:
+        row.querySelector(".fileInput")
+        ?.files?.[0]?.name || "image.jpg",
 
-          description:
-            row.querySelector(
-              'input[name="description[]"]'
-            )?.value || "",
+      partNumber:
+        row.querySelector(
+          'input[name="partNumber[]"]'
+        )?.value || "",
 
-          condition:
-            row.querySelector(
-              'input[name="condition[]"]'
-            )?.value || "",
+      namaBarang:
+        row.querySelector(
+          'input[name="namaBarang[]"]'
+        )?.value || "",
 
-          file:
-            imageBase64,
+      qty:
+        row.querySelector(
+          'input[name="qty[]"]'
+        )?.value || "",
 
-          fileName:
-            fileInput?.files?.[0]?.name || "image.jpg",
-          
+      satuan:
+        row.querySelector(
+          'input[name="satuan[]"]'
+        )?.value || "",
 
-          partNumber:
-            row.querySelector(
-              'input[name="partNumber[]"]'
-            )?.value || "",
+      bab:
+        babSel?.value || "",
 
-          namaBarang:
-            row.querySelector(
-              'input[name="namaBarang[]"]'
-            )?.value || "",
+      subBab:
+        subSel?.value || "",
 
-          qty:
-            row.querySelector(
-              'input[name="qty[]"]'
-            )?.value || "",
+      subCode:
+        subSel?.selectedOptions?.[0]
+        ?.dataset?.code || "",
 
-          satuan:
-            row.querySelector(
-              'input[name="satuan[]"]'
-            )?.value || "",
+      masukFPB:
+        row.querySelector(
+          'input[name="masukFPB[]"]'
+        )?.checked || false
 
-          bab:
-            babSel?.value || "",
+    });
 
-          subBab:
-            subSel?.value || "",
+  }
 
-          subCode:
-            subSel
-            ?.selectedOptions?.[0]
-            ?.dataset?.code || "",
+  // =========================
+  // FPB ROW
+  // =========================
+  else if (
+    row.classList.contains("fpb-row")
+  ) {
 
-          masukFPB:
-            row.querySelector(
-              'input[name="masukFPB[]"]'
-            )?.checked || false
+    items.push({
 
-        });
+      description: "",
+      condition: "",
+      file: "",
+      fileName: "",
 
-      }
+      partNumber:
+        row.querySelector(
+          'input[name="partNumberFPB[]"]'
+        )?.value || "",
 
+      namaBarang:
+        row.querySelector(
+          'input[name="namaBarangFPB[]"]'
+        )?.value || "",
+
+      qty:
+        row.querySelector(
+          'input[name="qtyFPB[]"]'
+        )?.value || "",
+
+      satuan:
+        row.querySelector(
+          'input[name="satuanFPB[]"]'
+        )?.value || "",
+
+      bab: "",
+      subBab: "",
+      subCode: "",
+
+      masukFPB:
+        row.querySelector(
+          'input[name="masukFPBRow[]"]'
+        )?.checked || false
+
+    });
+
+  }
+
+}
       const payload = {
 
         action: "submitForm",
