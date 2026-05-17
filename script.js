@@ -1,420 +1,837 @@
-// ======================================
-// JB INSPECTION SYSTEM - FIXED SCRIPT
-// ======================================
+// ==========================
+// KONFIGURASI GLOBAL
+// ==========================
+const WORKER_URL =
+  "https://jb-inspection-27a4.aldibagas2704.workers.dev/";
 
-// ===========================
-// MASTER COMPONENT DATA
-// ===========================
-
-const componentData = {
-  Engine: [
-    "Radiator",
-    "Turbo",
-    "Injector",
-    "Fuel Pump",
-    "Cylinder Head"
-  ],
-
-  Hydraulic: [
-    "Main Pump",
-    "Hydraulic Hose",
-    "Boom Cylinder",
-    "Arm Cylinder",
-    "Bucket Cylinder"
-  ],
-
-  Undercarriage: [
-    "Track Link",
-    "Carrier Roller",
-    "Track Roller",
-    "Sprocket",
-    "Idler"
-  ],
-
-  Electrical: [
-    "Battery",
-    "Alternator",
-    "Starter",
-    "Lamp",
-    "Harness"
-  ],
-
-  Cabin: [
-    "Seat",
-    "Joystick",
-    "Monitor",
-    "AC System"
-  ]
+// ==========================
+// CACHE DATA KOMPONEN
+// ==========================
+let KOM_DATA = {
+  groups: [],
+  byGroup: {}
 };
 
-// ===========================
-// ELEMENT
-// ===========================
+// ==========================
+// FETCH DATA KOMPONEN
+// ==========================
+async function fetchKomponen() {
 
-const tableBody = document.querySelector("#itemsTable tbody");
+  try {
 
-const addRowBtn = document.getElementById("addRowBtn");
+    console.log("Mengambil data komponen...");
 
-const addSubRowBtn = document.getElementById("addSubRowBtn");
+    const res = await fetch(WORKER_URL, {
 
-const form = document.getElementById("myForm");
+      method: "POST",
 
-// ===========================
-// CREATE COMPONENT OPTIONS
-// ===========================
+      headers: {
+        "Content-Type": "application/json"
+      },
 
-function createComponentOptions() {
+      body: JSON.stringify({
+        action: "getKomponen"
+      })
 
-  let options = `<option value="">Pilih Component</option>`;
+    });
 
-  Object.keys(componentData).forEach(component => {
+    const j = await res.json();
 
-    options += `
-      <option value="${component}">
-        ${component}
+    console.log("HASIL FETCH:", j);
+
+    if (!j.success || !Array.isArray(j.data)) {
+
+      throw new Error(
+        j.message || "Data komponen gagal dimuat"
+      );
+
+    }
+
+    const byGroup = {};
+
+    j.data.forEach(item => {
+
+      const group =
+        (
+          item["Component Group"] ||
+          item.componentGroup ||
+          ""
+        ).toString().trim();
+
+      const sub =
+        (
+          item["Sub Component"] ||
+          item.subComponent ||
+          ""
+        ).toString().trim();
+
+      const code =
+        (
+          item["Code"] ||
+          item.code ||
+          ""
+        ).toString().trim();
+
+      if (!group || !sub) return;
+
+      if (!byGroup[group]) {
+
+        byGroup[group] = [];
+
+      }
+
+      byGroup[group].push({
+        name: sub,
+        code: code
+      });
+
+    });
+
+    KOM_DATA.groups =
+      Object.keys(byGroup).sort();
+
+    KOM_DATA.byGroup = byGroup;
+
+    console.log("KOM_DATA:", KOM_DATA);
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "ERROR FETCH KOMPONEN:",
+      err
+    );
+
+    KOM_DATA = {
+      groups: [],
+      byGroup: {}
+    };
+
+  }
+
+}
+
+// ==========================
+// DOM READY
+// ==========================
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+  // ==========================
+  // ELEMENT
+  // ==========================
+  const form =
+    document.getElementById("myForm");
+
+  const itemsTableBody =
+    document.querySelector(
+      "#itemsTable tbody"
+    );
+
+  const output =
+    document.getElementById("output");
+
+  const overlay =
+    document.getElementById("overlay");
+
+  const addRowBtn =
+    document.getElementById("addRowBtn");
+
+  const addSubRowBtn =
+    document.getElementById("addSubRowBtn");
+
+  if (!form || !itemsTableBody) {
+
+    console.error(
+      "Form atau table body tidak ditemukan"
+    );
+
+    return;
+
+  }
+
+  // ==========================
+  // SET TANGGAL HARI INI
+  // ==========================
+  function setToday() {
+
+    const dateInput =
+      document.getElementById("Date");
+
+    if (!dateInput) return;
+
+    const d = new Date();
+
+    const yyyy =
+      d.getFullYear();
+
+    const mm =
+      String(d.getMonth() + 1)
+      .padStart(2, "0");
+
+    const dd =
+      String(d.getDate())
+      .padStart(2, "0");
+
+    dateInput.value =
+      `${yyyy}-${mm}-${dd}`;
+
+  }
+
+  setToday();
+
+  // ==========================
+  // LOAD KOMPONEN
+  // ==========================
+  await fetchKomponen();
+
+  // ==========================
+  // FILL COMPONENT GROUP
+  // ==========================
+  function fillBabOptions(selectEl) {
+
+    if (!selectEl) return;
+
+    selectEl.innerHTML = `
+      <option value="">
+        Pilih Component...
       </option>
     `;
 
-  });
+    KOM_DATA.groups.forEach(group => {
 
-  return options;
-}
+      const opt =
+        document.createElement("option");
 
-// ===========================
-// CREATE ROW
-// ===========================
+      opt.value = group;
 
-function createRow(type = "inspection") {
+      opt.textContent = group;
 
-  const row = document.createElement("tr");
+      selectEl.appendChild(opt);
 
-  // ===================================
-  // INSPECTION ROW
-  // ===================================
+    });
 
-  if (type === "inspection") {
-
-    row.innerHTML = `
-
-      <td>
-        <input type="text" class="form-control description">
-      </td>
-
-      <td>
-        <select class="form-select condition">
-
-          <option value="">Pilih</option>
-
-          <option value="GOOD">GOOD</option>
-
-          <option value="MONITOR">MONITOR</option>
-
-          <option value="REPAIR">REPAIR</option>
-
-          <option value="REPLACE">REPLACE</option>
-
-        </select>
-      </td>
-
-      <td>
-        <input type="file" class="form-control image" accept="image/*">
-      </td>
-
-      <td>
-        <input type="text" class="form-control partNumber">
-      </td>
-
-      <td>
-        <input type="text" class="form-control namaBarang">
-      </td>
-
-      <td>
-        <input type="number" class="form-control qty">
-      </td>
-
-      <td>
-        <input type="text" class="form-control satuan">
-      </td>
-
-      <td>
-
-        <select class="form-select componentGroup">
-
-          ${createComponentOptions()}
-
-        </select>
-
-      </td>
-
-      <td>
-
-        <select class="form-select subComponent">
-
-          <option value="">Pilih Sub Component</option>
-
-        </select>
-
-      </td>
-
-      <td class="text-center">
-        <input type="checkbox" class="form-check-input masukFPB">
-      </td>
-
-      <td>
-        <button type="button" class="btn btn-danger btn-sm deleteBtn">
-          Hapus
-        </button>
-      </td>
-
-    `;
+    selectEl.disabled = false;
 
   }
 
-  // ===================================
-  // FPB ROW
-  // ===================================
+  // ==========================
+  // FILL SUB COMPONENT
+  // ==========================
+  function fillSubOptions(
+    selectEl,
+    group
+  ) {
 
-  else {
+    if (!selectEl) return;
 
-    row.innerHTML = `
-
-      <td>
-        <input type="text" class="form-control bg-warning-subtle">
-      </td>
-
-      <td colspan="8">
-
-        <input
-          type="text"
-          class="form-control bg-warning-subtle"
-          placeholder="Catatan FPB"
-        >
-
-      </td>
-
-      <td class="text-center">
-        <input type="checkbox" checked>
-      </td>
-
-      <td>
-        <button type="button" class="btn btn-danger btn-sm deleteBtn">
-          Hapus
-        </button>
-      </td>
-
+    selectEl.innerHTML = `
+      <option value="">
+        Pilih Sub Component...
+      </option>
     `;
+
+    const subs =
+      KOM_DATA.byGroup[group] || [];
+
+    subs.forEach(sub => {
+
+      const opt =
+        document.createElement("option");
+
+      opt.value = sub.name;
+
+      opt.textContent = sub.name;
+
+      opt.dataset.code =
+        sub.code;
+
+      selectEl.appendChild(opt);
+
+    });
+
+    selectEl.disabled = false;
+
   }
 
-  // ===================================
-  // APPEND ROW
-  // ===================================
+  // ==========================
+  // WIRING COMPONENT - SUB
+  // ==========================
+  function wireBabSub(row) {
 
-  tableBody.appendChild(row);
+    const babSelect =
+      row.querySelector(".babSelect");
 
-  // ===================================
-  // DROPDOWN RELATION
-  // ===================================
+    const subSelect =
+      row.querySelector(".subSelect");
 
-  const componentSelect = row.querySelector(".componentGroup");
+    if (!babSelect || !subSelect) return;
 
-  const subComponentSelect = row.querySelector(".subComponent");
+    fillBabOptions(babSelect);
 
-  if (componentSelect && subComponentSelect) {
+    subSelect.innerHTML = `
+      <option value="">
+        Pilih Sub Component...
+      </option>
+    `;
 
-    componentSelect.addEventListener("change", function () {
+    subSelect.disabled = true;
 
-      const selectedComponent = this.value;
+    babSelect.addEventListener(
+      "change",
+      () => {
 
-      subComponentSelect.innerHTML =
-        `<option value="">Pilih Sub Component</option>`;
-
-      if (componentData[selectedComponent]) {
-
-        componentData[selectedComponent].forEach(sub => {
-
-          subComponentSelect.innerHTML += `
-            <option value="${sub}">
-              ${sub}
-            </option>
-          `;
-
-        });
-
-      }
+      fillSubOptions(
+        subSelect,
+        babSelect.value
+      );
 
     });
 
   }
 
-}
+  // ==========================
+  // SETUP ROW
+  // ==========================
+  function setupRow(row) {
 
-// ===========================
-// DEFAULT ROW
-// ===========================
+    // ==========================
+    // REMOVE ROW
+    // ==========================
+    row.querySelector(
+      ".removeRowBtn"
+    )?.addEventListener(
+      "click",
+      () => {
 
-createRow();
+      row.remove();
 
-// ===========================
-// ADD ROW BUTTON
-// ===========================
+      if (
+        itemsTableBody.children.length === 0
+      ) {
 
-if (addRowBtn) {
+        addRow();
 
-  addRowBtn.addEventListener("click", function () {
+      }
 
-    createRow("inspection");
+    });
 
-  });
+    // ==========================
+    // IMAGE PREVIEW
+    // ==========================
+    const fileInput =
+      row.querySelector(".fileInput");
 
-}
+    const preview =
+      row.querySelector(".img-preview");
 
-// ===========================
-// ADD FPB BUTTON
-// ===========================
+    if (fileInput && preview) {
 
-if (addSubRowBtn) {
+      fileInput.addEventListener(
+        "change",
+        e => {
 
-  addSubRowBtn.addEventListener("click", function () {
+        const file =
+          e.target.files[0];
 
-    createRow("fpb");
+        if (!file) return;
 
-  });
+        const reader =
+          new FileReader();
 
-}
+        reader.onload = ev => {
 
-// ===========================
-// DELETE ROW
-// ===========================
+          preview.src =
+            ev.target.result;
 
-document.addEventListener("click", function (e) {
+          preview.style.display =
+            "block";
 
-  if (e.target.classList.contains("deleteBtn")) {
+        };
 
-    e.target.closest("tr").remove();
+        reader.readAsDataURL(file);
+
+      });
+
+    }
+
+    // ==========================
+    // COMPONENT RELATION
+    // ==========================
+    wireBabSub(row);
 
   }
 
-});
+  // ==========================
+  // ADD MAIN ROW
+  // ==========================
+  function addRow() {
 
-// ===========================
-// IMAGE TO BASE64
-// ===========================
+    const row =
+      document.createElement("tr");
 
-function convertFileToBase64(file) {
+    row.className = "main-row";
 
-  return new Promise((resolve, reject) => {
+    row.innerHTML = `
 
-    const reader = new FileReader();
+      <td>
+        <input
+          type="text"
+          name="description[]"
+          class="form-control"
+          required
+        >
+      </td>
 
-    reader.readAsDataURL(file);
+      <td>
+        <input
+          type="text"
+          name="condition[]"
+          class="form-control"
+          required
+        >
+      </td>
 
-    reader.onload = () => resolve(reader.result);
+      <td>
 
-    reader.onerror = error => reject(error);
+        <input
+          type="file"
+          name="file[]"
+          accept="image/*"
+          class="form-control fileInput"
+        >
 
-  });
+        <img
+          class="img-preview"
+          style="
+            display:none;
+            width:50px;
+            margin-top:5px;
+          "
+        >
 
-}
+      </td>
 
-// ===========================
-// SUBMIT FORM
-// ===========================
+      <td>
+        <input
+          type="text"
+          name="partNumber[]"
+          class="form-control"
+        >
+      </td>
 
-if (form) {
+      <td>
+        <input
+          type="text"
+          name="namaBarang[]"
+          class="form-control"
+        >
+      </td>
 
-  form.addEventListener("submit", async function (e) {
+      <td>
+        <input
+          type="number"
+          name="qty[]"
+          class="form-control"
+        >
+      </td>
 
-    e.preventDefault();
+      <td>
+        <input
+          type="text"
+          name="satuan[]"
+          class="form-control"
+        >
+      </td>
+
+      <td>
+
+        <select
+          name="bab[]"
+          class="form-control babSelect"
+        ></select>
+
+      </td>
+
+      <td>
+
+        <select
+          name="subBab[]"
+          class="form-control subSelect"
+        ></select>
+
+      </td>
+
+      <td class="text-center">
+
+        <input
+          type="checkbox"
+          name="masukFPB[]"
+        >
+
+      </td>
+
+      <td class="text-center">
+
+        <button
+          type="button"
+          class="
+            btn
+            btn-danger
+            btn-sm
+            removeRowBtn
+          "
+        >
+          Hapus
+        </button>
+
+      </td>
+
+    `;
+
+    itemsTableBody.appendChild(row);
+
+    setupRow(row);
+
+  }
+
+  // ==========================
+  // ADD FPB ROW
+  // ==========================
+  function addFPBRow() {
+
+    const row =
+      document.createElement("tr");
+
+    row.className = "fpb-row";
+
+    row.innerHTML = `
+
+      <td colspan="10">
+
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Catatan FPB..."
+        >
+
+      </td>
+
+      <td class="text-center">
+
+        <button
+          type="button"
+          class="
+            btn
+            btn-danger
+            btn-sm
+            removeRowBtn
+          "
+        >
+          Hapus
+        </button>
+
+      </td>
+
+    `;
+
+    itemsTableBody.appendChild(row);
+
+    row.querySelector(
+      ".removeRowBtn"
+    )?.addEventListener(
+      "click",
+      () => row.remove()
+    );
+
+  }
+
+  // ==========================
+  // DEFAULT ROW
+  // ==========================
+  addRow();
+
+  // ==========================
+  // BUTTON TAMBAH ROW
+  // ==========================
+  addRowBtn?.addEventListener(
+    "click",
+    addRow
+  );
+
+  // ==========================
+  // BUTTON FPB
+  // ==========================
+  addSubRowBtn?.addEventListener(
+    "click",
+    addFPBRow
+  );
+
+  // ==========================
+  // FILE TO BASE64
+  // ==========================
+  async function fileToBase64(file) {
+
+    return await new Promise(
+      resolve => {
+
+      const reader =
+        new FileReader();
+
+      reader.onload = e => {
+
+        resolve(e.target.result);
+
+      };
+
+      reader.readAsDataURL(file);
+
+    });
+
+  }
+
+  // ==========================
+  // POST TO SHEET
+  // ==========================
+  async function postToSheet(payload) {
 
     try {
 
-      const rows = document.querySelectorAll("#itemsTable tbody tr");
+      const response =
+        await fetch(WORKER_URL, {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(payload)
+
+      });
+
+      return await response.json();
+
+    }
+
+    catch (err) {
+
+      console.error(err);
+
+      return {
+
+        success: false,
+
+        message:
+          "Gagal kirim data"
+
+      };
+
+    }
+
+  }
+
+  // ==========================
+  // SUBMIT FORM
+  // ==========================
+  form.addEventListener(
+    "submit",
+    async e => {
+
+    e.preventDefault();
+
+    overlay?.classList.remove(
+      "d-none"
+    );
+
+    try {
+
+      const rows =
+        Array.from(
+          itemsTableBody
+          .querySelectorAll(".main-row")
+        );
 
       const items = [];
 
       for (const row of rows) {
 
-        const description =
-          row.querySelector(".description")?.value || "";
-
-        const condition =
-          row.querySelector(".condition")?.value || "";
-
-        const partNumber =
-          row.querySelector(".partNumber")?.value || "";
-
-        const namaBarang =
-          row.querySelector(".namaBarang")?.value || "";
-
-        const qty =
-          row.querySelector(".qty")?.value || "";
-
-        const satuan =
-          row.querySelector(".satuan")?.value || "";
-
-        const componentGroup =
-          row.querySelector(".componentGroup")?.value || "";
-
-        const subComponent =
-          row.querySelector(".subComponent")?.value || "";
-
-        const masukFPB =
-          row.querySelector(".masukFPB")?.checked || false;
-
-        // ======================
-        // IMAGE
-        // ======================
+        const fileInput =
+          row.querySelector(
+            'input[name="file[]"]'
+          );
 
         let imageBase64 = "";
 
-        const imageInput = row.querySelector(".image");
-
         if (
-          imageInput &&
-          imageInput.files &&
-          imageInput.files[0]
+          fileInput?.files?.[0]
         ) {
 
           imageBase64 =
-            await convertFileToBase64(imageInput.files[0]);
+            await fileToBase64(
+              fileInput.files[0]
+            );
 
         }
 
+        const babSel =
+          row.querySelector(
+            'select[name="bab[]"]'
+          );
+
+        const subSel =
+          row.querySelector(
+            'select[name="subBab[]"]'
+          );
+
         items.push({
 
-          description,
-          condition,
-          image: imageBase64,
-          partNumber,
-          namaBarang,
-          qty,
-          satuan,
-          componentGroup,
-          subComponent,
-          masukFPB
+          description:
+            row.querySelector(
+              'input[name="description[]"]'
+            )?.value || "",
+
+          condition:
+            row.querySelector(
+              'input[name="condition[]"]'
+            )?.value || "",
+
+          image:
+            imageBase64,
+
+          partNumber:
+            row.querySelector(
+              'input[name="partNumber[]"]'
+            )?.value || "",
+
+          namaBarang:
+            row.querySelector(
+              'input[name="namaBarang[]"]'
+            )?.value || "",
+
+          qty:
+            row.querySelector(
+              'input[name="qty[]"]'
+            )?.value || "",
+
+          satuan:
+            row.querySelector(
+              'input[name="satuan[]"]'
+            )?.value || "",
+
+          bab:
+            babSel?.value || "",
+
+          subBab:
+            subSel?.value || "",
+
+          subCode:
+            subSel
+            ?.selectedOptions?.[0]
+            ?.dataset?.code || "",
+
+          masukFPB:
+            row.querySelector(
+              'input[name="masukFPB[]"]'
+            )?.checked || false
 
         });
 
       }
 
-      // ======================
-      // RESULT
-      // ======================
+      const payload = {
 
-      console.log("FORM DATA :", items);
+        action: "submitForm",
 
-      alert("Data inspection berhasil disubmit");
+        date:
+          document
+          .getElementById("Date")
+          ?.value || "",
+
+        site:
+          document
+          .querySelector(
+            'input[name="site"]'
+          )?.value || "",
+
+        codeUnit:
+          document
+          .querySelector(
+            'input[name="codeUnit"]'
+          )?.value || "",
+
+        hourMeter:
+          document
+          .querySelector(
+            'input[name="hourMeter"]'
+          )?.value || "",
+
+        inspectedBy:
+          document
+          .querySelector(
+            'input[name="inspectedBy"]'
+          )?.value || "",
+
+        priority:
+          document
+          .querySelector(
+            'input[name="priority"]'
+          )?.value || "",
+
+        items
+
+      };
+
+      console.log(
+        "PAYLOAD:",
+        payload
+      );
+
+      const result =
+        await postToSheet(payload);
+
+      overlay?.classList.add(
+        "d-none"
+      );
+
+      output.innerHTML =
+        result.message ||
+        "Submit selesai";
+
+      output.classList.remove(
+        "d-none"
+      );
+
+      if (result.success) {
+
+        form.reset();
+
+        itemsTableBody.innerHTML = "";
+
+        addRow();
+
+      }
 
     }
 
-    catch (error) {
+    catch (err) {
 
-      console.error(error);
+      console.error(err);
 
-      alert("Terjadi error saat submit");
+      overlay?.classList.add(
+        "d-none"
+      );
+
+      alert(
+        "Terjadi error saat submit"
+      );
 
     }
 
-  });
+  );
 
-}
+});
