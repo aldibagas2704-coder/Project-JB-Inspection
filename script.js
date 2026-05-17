@@ -52,25 +52,28 @@ async function fetchKomponen() {
     j.data.forEach(item => {
 
       const group =
-        (
-          item["Component Group"] ||
-          item.componentGroup ||
-          ""
-        ).toString().trim();
+(
+  item["COMPONENT GROUP"] ||
+  item["Component Group"] ||
+  item.componentGroup ||
+  ""
+).toString().trim();
 
-      const sub =
-        (
-          item["Sub Component"] ||
-          item.subComponent ||
-          ""
-        ).toString().trim();
+const sub =
+(
+  item["SUB COMPONENT"] ||
+  item["Sub Component"] ||
+  item.subComponent ||
+  ""
+).toString().trim();
 
-      const code =
-        (
-          item["Code"] ||
-          item.code ||
-          ""
-        ).toString().trim();
+const code =
+(
+  item["CODE"] ||
+  item["Code"] ||
+  item.code ||
+  ""
+).toString().trim();
 
       if (!group || !sub) return;
 
@@ -702,7 +705,7 @@ document.addEventListener(
       const rows =
         Array.from(
           itemsTableBody
-          .querySelectorAll(".main-row")
+          .querySelectorAll(".main-row, .fpb-row")
         );
 
       const items = [];
@@ -749,7 +752,7 @@ document.addEventListener(
               'input[name="condition[]"]'
             )?.value || "",
 
-          image:
+          file:
             imageBase64,
 
           partNumber:
@@ -847,9 +850,31 @@ document.addEventListener(
         "d-none"
       );
 
-      output.innerHTML =
-        result.message ||
-        "Submit selesai";
+      output.innerHTML = `
+  <div style="padding:10px;">
+
+    <div>
+      ${result.message || "Submit selesai"}
+    </div>
+
+    ${
+      result.pdfUrl
+      ? `
+        <br><br>
+
+        <a
+          href="${result.pdfUrl}"
+          target="_blank"
+          class="btn btn-success"
+        >
+          📄 Buka PDF
+        </a>
+      `
+      : ''
+    }
+
+  </div>
+`;
 
       output.classList.remove(
         "d-none"
