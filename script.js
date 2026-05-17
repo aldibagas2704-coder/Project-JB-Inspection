@@ -185,18 +185,6 @@ document.addEventListener(
 
   setToday();
 
-  // ==========================
-  // LOAD KOMPONEN
-  // ==========================
-  try {
-
-  await fetchKomponen();
-
-} catch(err) {
-
-  console.error(err);
-
-}
 
   // ==========================
   // FILL COMPONENT GROUP
@@ -600,6 +588,20 @@ document.addEventListener(
 
   }
 
+    
+  // ==========================
+  // LOAD KOMPONEN
+  // ==========================
+  try {
+
+  await fetchKomponen();
+
+} catch(err) {
+
+  console.error(err);
+
+}
+ 
   // ==========================
   // DEFAULT ROW
   // ==========================
