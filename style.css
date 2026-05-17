@@ -196,3 +196,104 @@ h1,h2,h3,h4,h5,h6 {
     max-width: 100%;
   }
 }
+
+
+/* =========================
+   TABLE INSPEKSI
+========================= */
+
+#itemsTable {
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+}
+
+#itemsTable thead th {
+
+  background: #1f2937;
+  color: white;
+
+  font-weight: 600;
+
+  text-align: center;
+
+  vertical-align: middle;
+
+  border: 1px solid #374151;
+
+}
+
+#itemsTable tbody tr {
+
+  transition: 0.2s ease;
+
+}
+
+/* zebra row */
+#itemsTable tbody tr:nth-child(even) {
+
+  background: #f8fafc;
+
+}
+
+#itemsTable tbody tr:nth-child(odd) {
+
+  background: #eef2f7;
+
+}
+
+/* hover */
+#itemsTable tbody tr:hover {
+
+  background: #dbeafe;
+
+}
+
+/* input style */
+#itemsTable input,
+#itemsTable select {
+
+  background: rgba(255,255,255,0.9);
+
+  border: 1px solid #cbd5e1;
+
+  border-radius: 8px;
+
+  min-height: 38px;
+
+  font-size: 13px;
+
+}
+
+/* focus */
+#itemsTable input:focus,
+#itemsTable select:focus {
+
+  border-color: #2563eb;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(37,99,235,0.15);
+
+}
+
+/* image preview */
+.img-preview {
+
+  border-radius: 8px;
+
+  border: 1px solid #cbd5e1;
+
+  object-fit: cover;
+
+}
+
+/* fpb row */
+.fpb-row {
+
+  background:
+    rgba(255, 248, 220, 0.8)
+    !important;
+
+}
