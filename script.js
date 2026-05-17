@@ -755,6 +755,10 @@ document.addEventListener(
           file:
             imageBase64,
 
+          fileName:
+            fileInput?.files?.[0]?.name || "image.jpg",
+          
+
           partNumber:
             row.querySelector(
               'input[name="partNumber[]"]'
