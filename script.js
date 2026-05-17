@@ -185,7 +185,15 @@ document.addEventListener(
   // ==========================
   // LOAD KOMPONEN
   // ==========================
+  try {
+
   await fetchKomponen();
+
+} catch(err) {
+
+  console.error(err);
+
+}
 
   // ==========================
   // FILL COMPONENT GROUP
