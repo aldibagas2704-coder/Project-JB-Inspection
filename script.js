@@ -875,10 +875,9 @@ fetchKomponen()
           )?.value || "",
 
         priority:
-          document
-          .querySelector(
-            'select[name="priority"]'
-          )?.value || "",
+        document
+        .getElementById("priority")
+        ?.value || "",
 
         items
 
