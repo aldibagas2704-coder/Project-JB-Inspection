@@ -647,6 +647,68 @@ fetchKomponen()
   }
 
   // ==========================
+  // KIRIM NOTIF FPB KE PIC
+  // ==========================
+  async function sendFPBNotification(codeUnit, inspectedBy, date, site, fpbItems) {
+
+    try {
+
+      console.log("Mengirim notifikasi FPB ke PIC...");
+
+      // Ambil PIC Email dari Unit Master berdasarkan codeUnit
+      const masterRes = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "getUnitMaster" })
+      });
+
+      const masterData = await masterRes.json();
+
+      if (!masterData.success || !Array.isArray(masterData.data)) {
+        console.warn("Unit Master gagal dimuat, notif FPB dibatalkan");
+        return;
+      }
+
+      const unit = masterData.data.find(
+        u => (u["Code Unit"] || "").toString().trim().toLowerCase()
+             === codeUnit.trim().toLowerCase()
+      );
+
+      if (!unit || !unit["PIC Email"]) {
+        console.warn("PIC Email tidak ditemukan untuk unit:", codeUnit);
+        return;
+      }
+
+      const picEmail = unit["PIC Email"];
+
+      console.log("Kirim FPB email ke:", picEmail);
+
+      // Kirim ke Worker → Apps Script → Gmail
+      const res = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "sendFPBEmail",
+          codeUnit,
+          inspectedBy,
+          date,
+          site,
+          picEmail,
+          fpbItems
+        })
+      });
+
+      const result = await res.json();
+      console.log("FPB Email result:", result);
+
+    } catch (err) {
+      // Gagal kirim notif tidak boleh ganggu alur utama
+      console.error("Gagal kirim notif FPB:", err);
+    }
+
+  }
+
+  // ==========================
   // POST TO SHEET
   // ==========================
   async function postToSheet(payload) {
@@ -922,6 +984,34 @@ fetchKomponen()
       );
 
       if (result.success) {
+
+        // ==========================
+        // CEK & KIRIM NOTIF FPB
+        // ==========================
+        const fpbItems = payload.items.filter(
+          item => item.masukFPB === true && (
+            item.partNumber || item.namaBarang || item.qty
+          )
+        );
+
+        if (fpbItems.length > 0) {
+
+          console.log(
+            "Ditemukan", fpbItems.length,
+            "item FPB, mengirim notifikasi..."
+          );
+
+          // Tidak di-await agar form langsung reset
+          // tanpa menunggu email selesai terkirim
+          sendFPBNotification(
+            payload.codeUnit,
+            payload.inspectedBy,
+            payload.date,
+            payload.site,
+            fpbItems
+          );
+
+        }
 
         form.reset();
 
