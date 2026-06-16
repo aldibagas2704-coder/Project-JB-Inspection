@@ -649,60 +649,8 @@ fetchKomponen()
   // ==========================
   // KIRIM NOTIF FPB KE PIC
   // ==========================
- async function sendFPBNotification(
-  codeUnit,
-  inspectedBy,
-  date,
-  site,
-  fpbItems
-) {
 
-  try {
-
-    console.log(
-      "Mengirim notifikasi FPB..."
-    );
-
-    const res = await fetch(
-      WORKER_URL,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
-        body: JSON.stringify({
-          action: "sendFPBEmail",
-          codeUnit,
-          inspectedBy,
-          date,
-          site,
-          fpbItems
-        })
-      }
-    );
-
-    const result =
-      await res.json();
-
-    console.log(
-      "FPB Email result:",
-      result
-    );
-
-  }
-
-  catch(err){
-
-    console.error(
-      "Gagal kirim notif FPB:",
-      err
-    );
-
-  }
-
-}
-
+    
   // ==========================
   // POST TO SHEET
   // ==========================
@@ -983,31 +931,6 @@ fetchKomponen()
         // ==========================
         // CEK & KIRIM NOTIF FPB
         // ==========================
-        const fpbItems = payload.items.filter(
-          item => item.masukFPB === true && (
-            item.partNumber || item.namaBarang || item.qty
-          )
-        );
-
-        if (fpbItems.length > 0) {
-
-          console.log(
-            "Ditemukan", fpbItems.length,
-            "item FPB, mengirim notifikasi..."
-          );
-
-          // Tidak di-await agar form langsung reset
-          // tanpa menunggu email selesai terkirim
-          sendFPBNotification(
-            payload.codeUnit,
-            payload.inspectedBy,
-            payload.date,
-            payload.site,
-            fpbItems
-          );
-
-        }
-
         form.reset();
 
         itemsTableBody.innerHTML = "";
