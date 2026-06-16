@@ -877,7 +877,7 @@ fetchKomponen()
         priority:
           document
           .querySelector(
-            'input[name="priority"]'
+            'select[name="priority"]'
           )?.value || "",
 
         items
