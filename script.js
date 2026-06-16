@@ -649,64 +649,59 @@ fetchKomponen()
   // ==========================
   // KIRIM NOTIF FPB KE PIC
   // ==========================
-  async function sendFPBNotification(codeUnit, inspectedBy, date, site, fpbItems) {
+ async function sendFPBNotification(
+  codeUnit,
+  inspectedBy,
+  date,
+  site,
+  fpbItems
+) {
 
-    try {
+  try {
 
-      console.log("Mengirim notifikasi FPB ke PIC...");
+    console.log(
+      "Mengirim notifikasi FPB..."
+    );
 
-      // Ambil PIC Email dari Unit Master berdasarkan codeUnit
-      const masterRes = await fetch(WORKER_URL, {
+    const res = await fetch(
+      WORKER_URL,
+      {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "getUnitMaster" })
-      });
-
-      const masterData = await masterRes.json();
-
-      if (!masterData.success || !Array.isArray(masterData.data)) {
-        console.warn("Unit Master gagal dimuat, notif FPB dibatalkan");
-        return;
-      }
-
-      const unit = masterData.data.find(
-        u => (u["Code Unit"] || "").toString().trim().toLowerCase()
-             === codeUnit.trim().toLowerCase()
-      );
-
-      if (!unit || !unit["PIC Email"]) {
-        console.warn("PIC Email tidak ditemukan untuk unit:", codeUnit);
-        return;
-      }
-
-      const picEmail = unit["PIC Email"];
-
-      console.log("Kirim FPB email ke:", picEmail);
-
-      // Kirim ke Worker → Apps Script → Gmail
-      const res = await fetch(WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
         body: JSON.stringify({
           action: "sendFPBEmail",
           codeUnit,
           inspectedBy,
           date,
           site,
-          picEmail,
           fpbItems
         })
-      });
+      }
+    );
 
-      const result = await res.json();
-      console.log("FPB Email result:", result);
+    const result =
+      await res.json();
 
-    } catch (err) {
-      // Gagal kirim notif tidak boleh ganggu alur utama
-      console.error("Gagal kirim notif FPB:", err);
-    }
+    console.log(
+      "FPB Email result:",
+      result
+    );
 
   }
+
+  catch(err){
+
+    console.error(
+      "Gagal kirim notif FPB:",
+      err
+    );
+
+  }
+
+}
 
   // ==========================
   // POST TO SHEET
