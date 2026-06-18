@@ -16,7 +16,7 @@
 
   <link
     rel="stylesheet"
-    href="dashboard-home.css?v=3"
+    href="dashboard-home.css?v=4"
   />
 
 </head>
@@ -175,6 +175,86 @@
   </section>
 
   <!-- ========================= -->
+  <!-- ANALYSIS SECTION         -->
+  <!-- ========================= -->
+
+  <section class="charts-grid analysis-grid">
+
+    <!-- TOP PROBLEM COMPONENT -->
+
+    <div class="card">
+
+      <div class="card-head">
+
+        <h3>
+          Top Problem Component
+        </h3>
+
+        <div class="controls">
+
+          <select id="topCompFilter" class="month">
+            <option value="all">Semua Waktu</option>
+            <option value="7">7 Hari</option>
+            <option value="30">30 Hari</option>
+            <option value="90">90 Hari</option>
+          </select>
+
+        </div>
+
+      </div>
+
+      <div class="card-body">
+
+        <div id="topCompMsg" class="muted" style="margin-bottom:10px">—</div>
+
+        <canvas
+          id="chartTopComp"
+          class="small-chart"
+        ></canvas>
+
+      </div>
+
+    </div>
+
+    <!-- PRIORITY DISTRIBUTION -->
+
+    <div class="card">
+
+      <div class="card-head">
+
+        <h3>
+          Priority Distribution
+        </h3>
+
+        <div class="controls">
+
+          <select id="prioFilter" class="month">
+            <option value="all">Semua Waktu</option>
+            <option value="7">7 Hari</option>
+            <option value="30">30 Hari</option>
+            <option value="90">90 Hari</option>
+          </select>
+
+        </div>
+
+      </div>
+
+      <div class="card-body prio-body">
+
+        <canvas
+          id="chartPrio"
+          class="small-chart prio-chart"
+        ></canvas>
+
+        <div id="prioLegend" class="prio-legend"></div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ========================= -->
   <!-- TODAY SCHEDULE -->
   <!-- ========================= -->
 
@@ -278,7 +358,7 @@
   <!-- MAIN SCRIPT -->
   <!-- ========================= -->
 
-  <script src="dashboard-home.js?v=3"></script>
+  <script src="dashboard-home.js?v=4"></script>
 
   <!-- ========================= -->
   <!-- OPTIONAL SCRIPT -->
