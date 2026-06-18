@@ -663,3 +663,125 @@ RESPONSIVE
   }
 
 }
+
+/* =========================
+ANALYSIS SECTION
+========================= */
+
+.analysis-grid {
+
+  margin-top: 20px;
+
+}
+
+/* =========================
+PRIORITY BODY & CHART
+========================= */
+
+.prio-body {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 24px;
+
+  flex-wrap: wrap;
+
+}
+
+.prio-chart {
+
+  flex: 0 0 auto;
+
+  width: 200px  !important;
+
+  height: 200px !important;
+
+}
+
+@media(max-width: 900px){
+
+  .prio-chart {
+
+    width: 160px  !important;
+
+    height: 160px !important;
+
+  }
+
+}
+
+/* =========================
+PRIORITY LEGEND
+========================= */
+
+.prio-legend {
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+
+  min-width: 160px;
+
+}
+
+.prio-legend-item {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  font-size: 14px;
+
+}
+
+.prio-dot {
+
+  flex-shrink: 0;
+
+  width: 14px;
+
+  height: 14px;
+
+  border-radius: 50%;
+
+}
+
+.prio-label {
+
+  flex: 1;
+
+  color: var(--text);
+
+  font-weight: 600;
+
+}
+
+.prio-val {
+
+  color: var(--accent);
+
+  font-weight: 700;
+
+  white-space: nowrap;
+
+}
+
+.prio-val em {
+
+  font-style: normal;
+
+  font-weight: 400;
+
+  color: var(--muted);
+
+  font-size: 12px;
+
+}
