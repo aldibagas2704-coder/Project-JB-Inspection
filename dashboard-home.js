@@ -820,6 +820,410 @@ document
 );
 
 // ============================
+// ANALYSIS — SHARED STATE
+// ============================
+
+let rawInspeksiData = [];  // cache hasil getInspeksi
+let chartTopComp = null;
+let chartPrio    = null;
+
+// ============================
+// ANALYSIS — FETCH DATA
+// ============================
+
+async function fetchInspeksiData(){
+
+  try {
+
+    const res = await postWorker({ action: "getInspeksi" });
+
+    if (!res.success || !Array.isArray(res.data)) return [];
+
+    return res.data;
+
+  } catch(e) {
+
+    console.error("[Analysis] fetchInspeksi error:", e);
+
+    return [];
+
+  }
+
+}
+
+// ============================
+// ANALYSIS — HELPERS
+// ============================
+
+function parseDateFromRow(row){
+
+  // Coba berbagai key nama kolom yang mungkin ada di spreadsheet
+  const raw =
+    row.tanggal   ||
+    row.Tanggal   ||
+    row.date      ||
+    row.Date      ||
+    row.tgl       ||
+    "";
+
+  if (!raw) return null;
+
+  // Format YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw))
+    return new Date(raw.slice(0,10));
+
+  // Format DD/MM/YYYY
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(String(raw).trim());
+  if (m) return new Date(`${m[3]}-${m[2]}-${m[1]}`);
+
+  const d = new Date(raw);
+  return isNaN(d) ? null : d;
+
+}
+
+function filterByDays(rows, days){
+
+  if (!days || days === "all") return rows;
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - Number(days));
+
+  return rows.filter(r => {
+    const d = parseDateFromRow(r);
+    return d && d >= cutoff;
+  });
+
+}
+
+// ============================
+// TOP PROBLEM COMPONENT
+// ============================
+
+function buildTopComp(rows, topN = 8){
+
+  const count = {};
+
+  rows.forEach(row => {
+
+    // Items bisa berupa array atau string JSON
+    let items = row.items || row.Items || [];
+
+    if (typeof items === "string") {
+      try { items = JSON.parse(items); } catch(e) { items = []; }
+    }
+
+    if (!Array.isArray(items)) return;
+
+    items.forEach(item => {
+
+      // Ambil nama komponen dari berbagai kemungkinan key
+      const comp =
+        (item.bab         ||
+         item.componentGroup ||
+         item.component   ||
+         item.komponen    ||
+         item.namaBarang  ||
+         "").toString().trim();
+
+      if (!comp) return;
+
+      count[comp] = (count[comp] || 0) + 1;
+
+    });
+
+  });
+
+  return Object.entries(count)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, topN);
+
+}
+
+function renderTopComp(rows){
+
+  const msgEl = document.getElementById("topCompMsg");
+  const data   = buildTopComp(rows);
+
+  if (!data.length){
+    if (msgEl) msgEl.textContent = "Belum ada data komponen tersedia.";
+    if (chartTopComp) { chartTopComp.data.labels = []; chartTopComp.data.datasets[0].data = []; chartTopComp.update(); }
+    return;
+  }
+
+  if (msgEl) msgEl.textContent = `${data.length} komponen teratas berdasarkan frekuensi temuan`;
+
+  const labels = data.map(d => d[0]);
+  const values = data.map(d => d[1]);
+
+  // Palet warna gradient dari accent ke warning
+  const colors = [
+    "#ef4444","#f97316","#f59e0b",
+    "#eab308","#84cc16","#22c55e",
+    "#1fd4ff","#4f7cff"
+  ];
+
+  const canvas = document.getElementById("chartTopComp");
+  if (!canvas) return;
+
+  if (chartTopComp){
+
+    chartTopComp.data.labels            = labels;
+    chartTopComp.data.datasets[0].data  = values;
+    chartTopComp.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
+    chartTopComp.update();
+
+  } else {
+
+    chartTopComp = new Chart(canvas, {
+
+      type: "bar",
+
+      data: {
+
+        labels,
+
+        datasets: [{
+
+          label: "Jumlah Temuan",
+
+          data: values,
+
+          backgroundColor: colors.slice(0, labels.length),
+
+          borderRadius: 8,
+
+          borderSkipped: false,
+
+        }]
+
+      },
+
+      options: {
+
+        indexAxis: "y",   // horizontal bar = lebih mudah dibaca nama komponen
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: { display: false },
+
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.parsed.x} temuan`
+            }
+          }
+
+        },
+
+        scales: {
+
+          x: {
+            beginAtZero: true,
+            ticks: { color: "#a8b4cf", precision: 0 },
+            grid:  { color: "rgba(255,255,255,0.07)" }
+          },
+
+          y: {
+            ticks: {
+              color: "#f4f7ff",
+              font: { size: 12 },
+              // Potong label panjang agar tidak overflow
+              callback: v => v.length > 22 ? v.slice(0,20)+"…" : v
+            },
+            grid: { display: false }
+          }
+
+        }
+
+      }
+
+    });
+
+  }
+
+}
+
+// ============================
+// PRIORITY DISTRIBUTION
+// ============================
+
+function buildPrioDist(rows){
+
+  const count = { P1: 0, P2: 0, P3: 0, Other: 0 };
+
+  rows.forEach(row => {
+
+    const p = (
+      row.priority ||
+      row.Priority ||
+      row.prioritas ||
+      ""
+    ).toString().trim().toUpperCase();
+
+    if      (p.startsWith("P1")) count.P1++;
+    else if (p.startsWith("P2")) count.P2++;
+    else if (p.startsWith("P3")) count.P3++;
+    else if (p)                   count.Other++;
+
+  });
+
+  return count;
+
+}
+
+function renderPrioDist(rows){
+
+  const dist   = buildPrioDist(rows);
+  const total  = dist.P1 + dist.P2 + dist.P3 + dist.Other;
+  const canvas = document.getElementById("chartPrio");
+  const legend = document.getElementById("prioLegend");
+
+  if (!canvas) return;
+
+  const labels = ["P1 — Critical","P2 — Medium","P3 — Low"];
+  const values = [dist.P1, dist.P2, dist.P3];
+  const colors = ["#ef4444","#f59e0b","#10b981"];
+
+  // Tambahkan "Other" hanya kalau ada
+  if (dist.Other > 0){
+    labels.push("Lainnya");
+    values.push(dist.Other);
+    colors.push("#a8b4cf");
+  }
+
+  if (chartPrio){
+
+    chartPrio.data.labels           = labels;
+    chartPrio.data.datasets[0].data = values;
+    chartPrio.update();
+
+  } else {
+
+    chartPrio = new Chart(canvas, {
+
+      type: "doughnut",
+
+      data: {
+
+        labels,
+
+        datasets: [{
+
+          data:            values,
+          backgroundColor: colors,
+          borderWidth:     3,
+          borderColor:     "#111c34",
+          hoverOffset:     12
+
+        }]
+
+      },
+
+      options: {
+
+        maintainAspectRatio: false,
+
+        cutout: "68%",
+
+        plugins: {
+
+          legend: { display: false },
+
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const pct = total
+                  ? ((ctx.parsed / total) * 100).toFixed(1)
+                  : 0;
+                return ` ${ctx.parsed} inspeksi (${pct}%)`;
+              }
+            }
+          }
+
+        }
+
+      }
+
+    });
+
+  }
+
+  // Custom legend
+  if (legend){
+
+    legend.innerHTML = labels.map((l,i) => {
+
+      const pct = total
+        ? ((values[i] / total) * 100).toFixed(1)
+        : 0;
+
+      return `
+        <div class="prio-legend-item">
+          <span class="prio-dot" style="background:${colors[i]}"></span>
+          <span class="prio-label">${l}</span>
+          <span class="prio-val">${values[i]} <em>(${pct}%)</em></span>
+        </div>
+      `;
+
+    }).join("");
+
+  }
+
+}
+
+// ============================
+// ANALYSIS — LOAD & WIRE
+// ============================
+
+async function loadAnalysisCharts(){
+
+  if (!rawInspeksiData.length){
+    rawInspeksiData = await fetchInspeksiData();
+  }
+
+  const compDays = document.getElementById("topCompFilter")?.value || "all";
+  const prioDays = document.getElementById("prioFilter")?.value    || "all";
+
+  renderTopComp(filterByDays(rawInspeksiData, compDays));
+  renderPrioDist(filterByDays(rawInspeksiData, prioDays));
+
+}
+
+// ============================
+// EVENT
+// ============================
+
+document
+.getElementById("tw-refresh")
+?.addEventListener(
+  "click",
+  loadAll
+);
+
+document
+.getElementById("topCompFilter")
+?.addEventListener("change", () => {
+  renderTopComp(
+    filterByDays(
+      rawInspeksiData,
+      document.getElementById("topCompFilter").value
+    )
+  );
+});
+
+document
+.getElementById("prioFilter")
+?.addEventListener("change", () => {
+  renderPrioDist(
+    filterByDays(
+      rawInspeksiData,
+      document.getElementById("prioFilter").value
+    )
+  );
+});
+
+// ============================
 // START
 // ============================
 
@@ -829,11 +1233,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
   loadAnalytics();
 
+  loadAnalysisCharts();
+
   setInterval(() => {
 
     loadAll();
 
     loadAnalytics();
+
+    rawInspeksiData = []; // reset cache agar refresh ambil data terbaru
+
+    loadAnalysisCharts();
 
   }, AUTO_REFRESH_MS);
 
