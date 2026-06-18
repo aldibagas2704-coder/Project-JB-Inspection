@@ -1112,10 +1112,14 @@ function renderPrioDist(rows){
 
       options: {
 
-        maintainAspectRatio: false,
+  responsive: true,
 
-        cutout: "68%",
+  maintainAspectRatio: true,
 
+  aspectRatio: 1,
+
+  cutout: "68%",
+        
         plugins: {
 
           legend: { display: false },
