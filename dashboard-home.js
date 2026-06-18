@@ -929,16 +929,20 @@ function renderTopComp(rows){
 
   if (!data.length){
     if (msgEl) msgEl.textContent = "Belum ada data komponen tersedia.";
-    if (chartTopComp) { chartTopComp.data.labels = []; chartTopComp.data.datasets[0].data = []; chartTopComp.update(); }
+    if (chartTopComp) {
+      chartTopComp.data.labels = [];
+      chartTopComp.data.datasets[0].data = [];
+      chartTopComp.update();
+    }
     return;
   }
 
-  if (msgEl) msgEl.textContent = `${data.length} komponen teratas berdasarkan frekuensi temuan`;
+  if (msgEl) msgEl.textContent =
+    `${data.length} komponen teratas • frekuensi temuan`;
 
   const labels = data.map(d => d[0]);
   const values = data.map(d => d[1]);
 
-  // Palet warna gradient dari accent ke warning
   const colors = [
     "#ef4444","#f97316","#f59e0b",
     "#eab308","#84cc16","#22c55e",
@@ -949,84 +953,86 @@ function renderTopComp(rows){
   if (!canvas) return;
 
   if (chartTopComp){
-
-    chartTopComp.data.labels            = labels;
-    chartTopComp.data.datasets[0].data  = values;
+    chartTopComp.data.labels           = labels;
+    chartTopComp.data.datasets[0].data = values;
     chartTopComp.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
     chartTopComp.update();
+    return;
+  }
 
-  } else {
+  chartTopComp = new Chart(canvas, {
 
-    chartTopComp = new Chart(canvas, {
+    type: "bar",
 
-      type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Jumlah Temuan",
+        data: values,
+        backgroundColor: colors.slice(0, labels.length),
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
 
-      data: {
+    options: {
 
-        labels,
+      indexAxis: "y",
 
-        datasets: [{
+      maintainAspectRatio: false,
 
-          label: "Jumlah Temuan",
+      layout: {
+        padding: { right: 8 }
+      },
 
-          data: values,
+      plugins: {
 
-          backgroundColor: colors.slice(0, labels.length),
+        legend: { display: false },
 
-          borderRadius: 8,
-
-          borderSkipped: false,
-
-        }]
+        tooltip: {
+          callbacks: {
+            title: ctx => ctx[0].label,
+            label: ctx => `  ${ctx.parsed.x} temuan`
+          }
+        }
 
       },
 
-      options: {
+      scales: {
 
-        indexAxis: "y",   // horizontal bar = lebih mudah dibaca nama komponen
-
-        maintainAspectRatio: false,
-
-        plugins: {
-
-          legend: { display: false },
-
-          tooltip: {
-            callbacks: {
-              label: ctx => ` ${ctx.parsed.x} temuan`
-            }
-          }
-
+        x: {
+          beginAtZero: true,
+          ticks: {
+            color: "#a8b4cf",
+            precision: 0,
+            font: { size: 11 }
+          },
+          grid: { color: "rgba(255,255,255,0.07)" }
         },
 
-        scales: {
-
-          x: {
-            beginAtZero: true,
-            ticks: { color: "#a8b4cf", precision: 0 },
-            grid:  { color: "rgba(255,255,255,0.07)" }
+        y: {
+          ticks: {
+            color: "#f4f7ff",
+            font: { size: 11 },
+            crossAlign: "far",
+            callback: function(val) {
+              const label = this.getLabelForValue(val);
+              return label.length > 20
+                ? label.slice(0, 18) + "…"
+                : label;
+            }
           },
-
-          y: {
-            ticks: {
-              color: "#f4f7ff",
-              font: { size: 12 },
-              // Potong label panjang agar tidak overflow
-              callback: v => v.length > 22 ? v.slice(0,20)+"…" : v
-            },
-            grid: { display: false }
-          }
-
+          grid: { display: false }
         }
 
       }
 
-    });
+    }
 
-  }
+  });
 
 }
-
+  
 // ============================
 // PRIORITY DISTRIBUTION
 // ============================
