@@ -694,9 +694,9 @@ PRIORITY BODY & CHART
 
   flex: 0 0 auto;
 
-  width: 160px  !important;
+  width: 220px  !important;
 
-  height: 160px !important;
+  height: 220px !important;
 
 }
 
@@ -704,9 +704,9 @@ PRIORITY BODY & CHART
 
   .prio-chart {
 
-    width: 130px  !important;
+    width: 180px  !important;
 
-    height: 130px !important;
+    height: 180px !important;
 
   }
 
