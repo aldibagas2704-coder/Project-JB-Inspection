@@ -857,22 +857,18 @@ async function fetchInspeksiData(){
 
 function parseDateFromRow(row){
 
-  // Coba berbagai key nama kolom yang mungkin ada di spreadsheet
   const raw =
-    row.tanggal   ||
-    row.Tanggal   ||
-    row.date      ||
-    row.Date      ||
-    row.tgl       ||
+    row.Tanggal  ||
+    row.tanggal  ||
+    row.date     ||
+    row.Date     ||
     "";
 
   if (!raw) return null;
 
-  // Format YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}/.test(raw))
     return new Date(raw.slice(0,10));
 
-  // Format DD/MM/YYYY
   const m = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(String(raw).trim());
   if (m) return new Date(`${m[3]}-${m[2]}-${m[1]}`);
 
@@ -905,31 +901,17 @@ function buildTopComp(rows, topN = 8){
 
   rows.forEach(row => {
 
-    // Items bisa berupa array atau string JSON
-    let items = row.items || row.Items || [];
+    // Data flat per baris — ambil langsung dari field "Bab"
+    const comp =
+      (row["Bab"]                  ||
+       row["Bab (Component Group)"] ||
+       row.bab                     ||
+       row.componentGroup          ||
+       "").toString().trim();
 
-    if (typeof items === "string") {
-      try { items = JSON.parse(items); } catch(e) { items = []; }
-    }
+    if (!comp) return;
 
-    if (!Array.isArray(items)) return;
-
-    items.forEach(item => {
-
-      // Ambil nama komponen dari berbagai kemungkinan key
-      const comp =
-        (item.bab         ||
-         item.componentGroup ||
-         item.component   ||
-         item.komponen    ||
-         item.namaBarang  ||
-         "").toString().trim();
-
-      if (!comp) return;
-
-      count[comp] = (count[comp] || 0) + 1;
-
-    });
+    count[comp] = (count[comp] || 0) + 1;
 
   });
 
@@ -939,6 +921,7 @@ function buildTopComp(rows, topN = 8){
 
 }
 
+  
 function renderTopComp(rows){
 
   const msgEl = document.getElementById("topCompMsg");
@@ -1054,24 +1037,25 @@ function buildPrioDist(rows){
 
   rows.forEach(row => {
 
-    const p = (
-      row.priority ||
-      row.Priority ||
-      row.prioritas ||
-      ""
-    ).toString().trim().toUpperCase();
+    // Field di Sheet namanya "Urgency" dengan value "p1"/"p2"/"p3"
+    const p =
+      (row.Urgency   ||
+       row.urgency   ||
+       row.Priority  ||
+       row.priority  ||
+       "").toString().trim().toLowerCase();
 
-    if      (p.startsWith("P1")) count.P1++;
-    else if (p.startsWith("P2")) count.P2++;
-    else if (p.startsWith("P3")) count.P3++;
-    else if (p)                   count.Other++;
+    if      (p === "p1" || p.startsWith("p1")) count.P1++;
+    else if (p === "p2" || p.startsWith("p2")) count.P2++;
+    else if (p === "p3" || p.startsWith("p3")) count.P3++;
+    else if (p)                                 count.Other++;
 
   });
 
   return count;
 
 }
-
+  
 function renderPrioDist(rows){
 
   const dist   = buildPrioDist(rows);
