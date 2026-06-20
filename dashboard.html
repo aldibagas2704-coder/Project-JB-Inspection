@@ -1,110 +1,71 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>
-    Dashboard Inspeksi
-  </title>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
-    rel="stylesheet"
-  >
-
-  <link
-    rel="stylesheet"
-    href="dashboard.css"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Inspeksi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
 </head>
-
 <body>
-
   <div class="container">
 
-    <!-- ========================= -->
     <!-- SIDEBAR -->
-    <!-- ========================= -->
-
     <aside class="sidebar">
-
       <div class="brand">
-
-        <img
-          class="brand-logo"
-          src="assets/logo.png"
-          alt="Logo"
-        >
-
-        <h2>
-          Dashboard Inspeksi
-        </h2>
-
+        <img class="brand-logo" src="assets/logo.png" alt="Logo">
+        <div>
+          <h2>Dashboard Inspeksi</h2>
+          <p class="version">v1.0 • Single File</p>
+        </div>
       </div>
 
-      <p class="version">
-        v1.0 • Single File
-      </p>
-
       <nav>
-
         <ul>
-
           <li>
-            <button data-page="dashboard-home.html">
-              🏠 Dashboard
+            <button class="nav-btn active" data-page="dashboard-home.html">
+              <span class="nav-icon">🏠</span> Dashboard
             </button>
           </li>
 
           <li>
-            <button data-page="form.html">
-              📝 Form Inspeksi
+            <button class="nav-btn nav-pareto" data-page="pareto.html">
+              <span class="nav-icon">📊</span> Analisis Pareto
+              <span class="nav-badge">Baru</span>
             </button>
           </li>
 
           <li>
-            <button data-page="database.html">
-              💾 History
+            <button class="nav-btn" data-page="form.html">
+              <span class="nav-icon">📝</span> Form Inspeksi
             </button>
           </li>
 
           <li>
-            <button data-page="jadwal.html">
-              📅 Jadwal Inspeksi
+            <button class="nav-btn" data-page="database.html">
+              <span class="nav-icon">💾</span> History
             </button>
           </li>
 
+          <li>
+            <button class="nav-btn" data-page="jadwal.html">
+              <span class="nav-icon">📅</span> Jadwal Inspeksi
+            </button>
+          </li>
         </ul>
-
       </nav>
-
     </aside>
 
-    <!-- ========================= -->
     <!-- CONTENT -->
-    <!-- ========================= -->
-
     <section class="content">
-
-      <iframe
-        id="iframe-content"
-        src="dashboard-home.html"
-        frameborder="0"
-      ></iframe>
-
+      <iframe id="iframe-content"
+              src="dashboard-home.html"
+              frameborder="0">
+      </iframe>
     </section>
 
   </div>
 
   <script src="dashboard.js"></script>
-  
 </body>
 </html>
