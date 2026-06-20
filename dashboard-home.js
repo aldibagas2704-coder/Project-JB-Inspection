@@ -8,39 +8,67 @@ const AUTO_REFRESH_MS = 60000;
 // ============================
 
 function parseDateFromRow(row){
-  // Field dari getJadwal() di Apps Script: semua lowercase → 'tanggal'
-  // Field dari jadwal-script.js (processed): 'tanggalYMD'
-  // Google Sheets bisa kembalikan Date serial number, ISO string, atau DD/MM/YYYY
-  const raw = row.tanggal || row.tanggalYMD || row.Tanggal || row.Date || row.date || "";
+
+  const raw =
+    row.tanggal ||
+    row.tanggalYMD ||
+    row.Tanggal ||
+    row.Date ||
+    row.date ||
+    "";
+
   if(!raw) return null;
 
-  // Kalau angka → Google Sheets Date serial (hari sejak 30 Des 1899)
   if(typeof raw === 'number'){
     const msPerDay = 86400000;
-    const epoch = new Date(Date.UTC(1899, 11, 30));
+    const epoch = new Date(Date.UTC(1899,11,30));
     return new Date(epoch.getTime() + raw * msPerDay);
   }
 
   const s = String(raw).trim();
 
-  // YYYY-MM-DD (dari input type=date)
+  // ISO dari Google Sheet
+  if(s.includes("T")){
+    const d = new Date(s);
+
+    return new Date(
+      d.getFullYear(),
+      d.getMonth(),
+      d.getDate()
+    );
+  }
+
   const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
-  if(ymd) return new Date(Number(ymd[1]), Number(ymd[2])-1, Number(ymd[3]));
 
-  // DD/MM/YYYY
+  if(ymd){
+    return new Date(
+      Number(ymd[1]),
+      Number(ymd[2])-1,
+      Number(ymd[3])
+    );
+  }
+
   const dmy = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(s);
-  if(dmy) return new Date(Number(dmy[3]), Number(dmy[2])-1, Number(dmy[1]));
 
-  // ISO string dari Sheets (mis: "2026-06-21T00:00:00.000Z")
-  if (s.includes("T")) {
+  if(dmy){
+    return new Date(
+      Number(dmy[3]),
+      Number(dmy[2])-1,
+      Number(dmy[1])
+    );
+  }
+
   const d = new Date(s);
-  return isNaN(d) ? null : d;
-}
 
-  const d = new Date(s);
-  return isNaN(d) ? null : d;
-}
+  if(isNaN(d)) return null;
 
+  return new Date(
+    d.getFullYear(),
+    d.getMonth(),
+    d.getDate()
+  );
+}
+  
 function filterByDays(rows, days){
   if(!days || days === "all") return rows;
   const cutoff = new Date();
@@ -299,7 +327,8 @@ function renderPriorityDistribution(rows){
 let statusHariIniChart;
 
 function renderStatusHariIni(jadwalRows) {
-  const today    = new Date();
+  const today = new Date();
+  today.setHours(0,0,0,0);
   const todayYMD = getDateYMD(today);
 
   const todayRows = jadwalRows.filter(r => {
@@ -448,7 +477,8 @@ function renderBulanan(jadwalRows, ym) {
 // ============================
 
 function renderJadwalHariIniTable(jadwalRows) {
-  const today    = new Date();
+  const today = new Date();
+  today.setHours(0,0,0,0);
   const todayYMD = getDateYMD(today);
 
   const todayRows = jadwalRows.filter(r => {
@@ -493,20 +523,14 @@ function renderJadwalHariIniTable(jadwalRows) {
 
 let rawInspeksi = [];
 let rawJadwal   = [];
-
-console.log("TOTAL JADWAL :", rawJadwal.length);
-
-rawJadwal.forEach(r=>{
-  console.log(
-    r.tanggal,
-    parseDateFromRow(r)
-  );
-});
   
 async function loadDashboard(){
   rawInspeksi = await fetchInspeksi();
   rawJadwal   = await fetchJadwal();
 
+  console.log("RAW JADWAL", rawJadwal);
+  console.log("TOTAL JADWAL", rawJadwal.length);
+  
   renderStats(rawInspeksi, rawJadwal);
   applyTopCompFilter();
   applyPrioFilter();
