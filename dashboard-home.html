@@ -94,7 +94,66 @@
     </div>
   </section>
 
-  <!-- CHART SECTION -->
+  <!-- STATUS JADWAL HARI INI + JADWAL vs SELESAI BULANAN -->
+  <section class="chart-grid-2">
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Status Jadwal — Hari Ini</h3>
+      </div>
+      <div class="card-body prio-body">
+        <div class="prio-chart-wrap">
+          <canvas id="statusHariIniChart" class="prio-chart"></canvas>
+        </div>
+        <div class="prio-legend" id="statusHariIniLegend"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Jadwal vs Selesai — Bulanan</h3>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="bulananMonthLabel" style="font-size:0.85rem;color:var(--text-muted,#94a3b8);"></span>
+          <input type="month" id="bulananMonthPicker" class="filter-select" style="padding:4px 8px;">
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="muted small-sub" id="bulananSub">Memuat data…</div>
+        <div style="position:relative;height:220px;">
+          <canvas id="bulananChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- TABEL JADWAL INSPEKSI HARI INI -->
+  <section class="card">
+    <div class="card-head" style="justify-content:space-between;">
+      <h3>Jadwal Inspeksi Hari Ini</h3>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span id="jadwalHariIniDate" class="muted" style="font-size:0.85rem;"></span>
+        <button id="btnRefreshJadwalHariIni" class="btn-refresh">Refresh</button>
+      </div>
+    </div>
+    <div class="card-body" style="overflow-x:auto;">
+      <table class="jadwal-table" id="jadwalHariIniTable">
+        <thead>
+          <tr>
+            <th>Kode Unit</th>
+            <th>Tanggal</th>
+            <th>Lokasi</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="jadwalHariIniBody">
+          <tr><td colspan="4" class="muted" style="text-align:center;padding:16px;">Memuat data…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CHART SECTION (Top Problem + Priority Distribution) -->
   <section class="chart-grid-2">
 
     <div class="card">
@@ -141,4 +200,3 @@
 <script src="dashboard-home.js"></script>
 </body>
 </html>
-
