@@ -1,258 +1,427 @@
-<div class="dashboard-home">
-
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-
-    <div>
-      <h2>Dashboard Monitoring</h2>
-      <p class="page-sub">
-        Ringkasan performa inspeksi dan kondisi unit
-      </p>
-    </div>
-
-  </div>
-
-  <!-- KPI CARDS -->
-  <section class="stats-grid">
-
-    <div class="stat-card">
-
-      <div class="card-icon">📋</div>
-
-      <div class="card-content">
-
-        <div class="stat-number"
-             id="totalInspection">
-          0
-        </div>
-
-        <div class="stat-label">
-          Total Inspection
-        </div>
-
-        <small>
-          Total inspeksi yang telah dilakukan
-        </small>
-
-      </div>
-
-    </div>
-
-    <div class="stat-card">
-
-      <div class="card-icon">🟢</div>
-
-      <div class="card-content">
-
-        <div class="stat-number"
-             id="totalClosed">
-          0
-        </div>
-
-        <div class="stat-label">
-          Closed
-        </div>
-
-        <small>
-          Temuan yang telah selesai ditindaklanjuti
-        </small>
-
-      </div>
-
-    </div>
-
-    <div class="stat-card">
-
-      <div class="card-icon">🟡</div>
-
-      <div class="card-content">
-
-        <div class="stat-number"
-             id="totalProgress">
-          0
-        </div>
-
-        <div class="stat-label">
-          Progress
-        </div>
-
-        <small>
-          Temuan yang masih dalam proses
-        </small>
-
-      </div>
-
-    </div>
-
-    <div class="stat-card">
-
-      <div class="card-icon">🔴</div>
-
-      <div class="card-content">
-
-        <div class="stat-number"
-             id="totalOpen">
-          0
-        </div>
-
-        <div class="stat-label">
-          Open
-        </div>
-
-        <small>
-          Temuan yang belum ditindaklanjuti
-        </small>
-
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- COMPLIANCE -->
-  <section class="kpi-section">
-
-    <div class="kpi-card">
-
-      <div class="kpi-title">
-        Compliance Rate
-      </div>
-
-      <div class="kpi-value"
-           id="complianceRate">
-        0%
-      </div>
-
-      <div class="kpi-desc"
-           id="complianceDesc">
-        Memuat data...
-      </div>
-
-    </div>
-
-    <div class="decision-card">
-
-      <div class="decision-title">
-        Decision Support
-      </div>
-
-      <div id="decisionBox">
-
-        <div class="decision-loading">
-          Memuat analisis...
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-    <!-- CHART SECTION -->
-  <section class="chart-grid">
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <h3>Status Temuan</h3>
-
-      </div>
-
-      <div class="chart-container">
-
-        <canvas id="statusChart"></canvas>
-
-      </div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <h3>Schedule PM Bulanan</h3>
-
-        <input type="month"
-               id="monthPicker">
-
-      </div>
-
-      <div id="monthSummary"
-           class="month-summary">
-
-        Total Schedule:
-        <b>0</b>
-
-      </div>
-
-      <div class="chart-container">
-
-        <canvas id="monthlyChart"></canvas>
-
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- TODAY WARNING -->
-  <section class="card">
-
-    <div class="card-head">
-
-      <h3>
-        Unit PM Jatuh Tempo Hari Ini
-      </h3>
-
-      <span id="tw-date">
-        -
-      </span>
-
-    </div>
-
-    <div id="tw-msg"
-         class="tw-msg">
-      Memuat data...
-    </div>
-
-    <div class="table-wrap">
-
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>Unit</th>
-            <th>Component</th>
-            <th>HM</th>
-            <th>Next PM</th>
-            <th>Status</th>
-
-          </tr>
-
-        </thead>
-
-        <tbody id="tw-tbody">
-
-          <tr>
-
-            <td colspan="5">
-              Memuat data...
-            </td>
-
-          </tr>
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-  </section>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="dashboard-home.js"></script>
+:root {
+  --bg:      #0b1220;
+  --bg2:     #111c34;
+  --card:    #18243d;
+  --card2:   #223250;
+  --border:  #31415f;
+  --accent:  #1fd4ff;
+  --accent2: #4f7cff;
+  --text:    #f4f7ff;
+  --muted:   #a8b4cf;
+  --success: #10b981;
+  --danger:  #ef4444;
+  --warning: #f59e0b;
+  --shadow:  0 8px 32px rgba(0,0,0,0.4);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: linear-gradient(135deg, #0b1220 0%, #13203b 100%);
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 28px 32px;
+  font-family: 'Poppins', Inter, system-ui, sans-serif;
+  color: var(--text);
+}
+
+h2 {
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: #ffffff;
+}
+
+/* ========================
+   SUMMARY CARDS
+======================== */
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+@media(max-width: 900px) {
+  .analytics-grid { grid-template-columns: 1fr; }
+}
+
+.analytics-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 28px 28px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.25s ease;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.analytics-card:hover { transform: translateY(-4px); }
+
+.card-blue  { background: linear-gradient(135deg, #1a2f56, #2a4a82); }
+.card-red   { background: linear-gradient(135deg, #7f1d1d, #ef4444); }
+.card-green { background: linear-gradient(135deg, #064e3b, #10b981); }
+
+.card-icon {
+  font-size: 36px;
+  line-height: 1;
+  margin-top: 4px;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.card-content { flex: 1; }
+
+.analytics-card h2 {
+  font-size: 56px;
+  margin: 0 0 2px 0;
+  color: white;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.analytics-card p {
+  margin: 4px 0 2px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+}
+
+.analytics-card small {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+
+/* ========================
+   DECISION MAKING
+======================== */
+
+.decision-section { margin-top: 0; margin-bottom: 20px; }
+
+.decision-card {
+  background: linear-gradient(145deg, rgba(30,41,69,.95), rgba(23,34,58,.95));
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: var(--shadow);
+}
+
+.decision-card h3 {
+  margin: 0 0 18px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.decision-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.decision-item {
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: 0.2s ease;
+}
+
+.decision-item:hover { transform: translateY(-2px); }
+
+.decision-item h4 {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #a8b4cf;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.decision-item .decision-value {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.decision-item p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.7);
+}
+
+.decision-item ul {
+  margin: 6px 0 0 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.decision-item ul li {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.7;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.decision-item ul li::before {
+  content: "•";
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.decision-good {
+  background: linear-gradient(135deg, rgba(16,185,129,.2), rgba(16,185,129,.08));
+  border: 1px solid rgba(16,185,129,0.25);
+}
+.decision-good .decision-value { color: #34d399; }
+
+.decision-warning {
+  background: linear-gradient(135deg, rgba(245,158,11,.2), rgba(245,158,11,.08));
+  border: 1px solid rgba(245,158,11,0.25);
+}
+.decision-warning .decision-value { color: #fbbf24; }
+
+.decision-danger {
+  background: linear-gradient(135deg, rgba(239,68,68,.2), rgba(239,68,68,.08));
+  border: 1px solid rgba(239,68,68,0.25);
+}
+.decision-danger .decision-value { color: #f87171; }
+
+.decision-info {
+  background: linear-gradient(135deg, rgba(31,212,255,.15), rgba(79,124,255,.08));
+  border: 1px solid rgba(31,212,255,0.2);
+}
+.decision-info .decision-value { color: #38bdf8; }
+
+/* ========================
+   CHART GRID
+======================== */
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+@media(max-width: 950px) {
+  .charts-grid { grid-template-columns: 1fr; }
+}
+
+.analysis-grid { margin-bottom: 0; }
+
+/* ========================
+   CARD
+======================== */
+
+.card,
+.today-widget,
+.decision-card {
+  background: linear-gradient(145deg, rgba(30,41,69,.95), rgba(23,34,58,.95));
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.card-head,
+.tw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  background: rgba(10,18,35,.45);
+}
+
+.card-head h3,
+.tw-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.card-body { padding: 18px 20px; }
+
+/* ========================
+   CONTROLS / SELECT / INPUT
+======================== */
+
+.controls .month {
+  background: #0f172a;
+  border: 1px solid rgba(255,255,255,.1);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ========================
+   BUTTONS
+======================== */
+
+button#tw-refresh,
+.btn-primary {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(135deg, #1fd4ff, #4f7cff);
+  transition: 0.2s ease;
+}
+
+button#tw-refresh:hover { transform: translateY(-1px); filter: brightness(1.1); }
+
+/* ========================
+   TEXT
+======================== */
+
+.muted, .tw-muted { color: var(--muted); font-size: 13px; }
+
+/* ========================
+   CHART SIZES
+======================== */
+
+.small-chart {
+  width: 100% !important;
+  height: 280px !important;
+}
+
+@media(max-width: 900px) {
+  .small-chart { height: 220px !important; }
+}
+
+/* ========================
+   PRIORITY CHART
+======================== */
+
+.prio-body {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.prio-chart {
+  flex: 0 0 auto;
+  width: 200px !important;
+  height: 200px !important;
+}
+
+.prio-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 160px;
+}
+
+.prio-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.prio-dot {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.prio-label { flex: 1; color: var(--text); font-weight: 600; }
+
+.prio-val {
+  color: var(--accent);
+  font-weight: 700;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.prio-val em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* ========================
+   TODAY WIDGET
+======================== */
+
+.today-widget { margin-top: 18px; }
+
+.tw-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tw-meta span { font-size: 13px; color: var(--muted); }
+
+.tw-tablewrap {
+  overflow-x: auto;
+  margin: 0;
+}
+
+.tw-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tw-table thead th {
+  background: linear-gradient(135deg, #1fd4ff, #4f7cff);
+  color: white;
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tw-table tbody td {
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+.tw-table tbody tr { background: #1a2742; transition: 0.2s ease; }
+.tw-table tbody tr:nth-child(even) { background: #1f2f4e; }
+.tw-table tbody tr:hover { background: #2a3d64; }
+
+.tw-msg {
+  background: rgba(255,255,255,.05);
+  padding: 12px;
+  border-radius: 10px;
+  margin: 12px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tw-hidden { display: none; }
+
+@media(max-width: 768px) {
+  body { padding: 16px; }
+  .analytics-card h2 { font-size: 40px; }
+}
