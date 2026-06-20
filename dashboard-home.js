@@ -1,724 +1,310 @@
 (() => {
 
-const WORKER_URL =
-"https://jb-inspection-27a4.aldibagas2704.workers.dev/";
-
+const WORKER_URL = "https://jb-inspection-27a4.aldibagas2704.workers.dev/";
 const AUTO_REFRESH_MS = 60000;
 
 // ============================
-// HELPER
+// HELPERS
 // ============================
 
-const pad2 = n =>
-String(n).padStart(2,'0');
+function parseDateFromRow(row){
+  const raw = row.Tanggal || row.tanggal || row.Date || row.date || "";
+  if(!raw) return null;
+  if(/^\d{4}-\d{2}-\d{2}/.test(raw)) return new Date(raw.slice(0,10));
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(String(raw).trim());
+  if(m) return new Date(`${m[3]}-${m[2]}-${m[1]}`);
+  const d = new Date(raw);
+  return isNaN(d) ? null : d;
+}
 
-const toDDMMYYYY = d =>
-`${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`;
+function filterByDays(rows, days){
+  if(!days || days === "all") return rows;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - Number(days));
+  return rows.filter(r => {
+    const d = parseDateFromRow(r);
+    return d && d >= cutoff;
+  });
+}
 
-const todayYMD = () => {
+function getComponent(row){
+  return (
+    row["Bab"] ||
+    row["Bab (Component Group)"] ||
+    row.bab ||
+    row.componentGroup ||
+    ""
+  ).toString().trim();
+}
 
-  const d = new Date();
+function classifyPriority(row){
+  const u = String(
+    row["Urgency"] || row["Priority"] || row.urgency || row.priority || ""
+  ).toLowerCase();
 
-  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-
-};
-
-const anyToYMD = v => {
-
-  if (!v) return "";
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
-    return v;
-  }
-
-  const d = new Date(v);
-
-  if (!isNaN(d)) {
-
-    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-
-  }
-
-  const m =
-  /^(\d{2})\/(\d{2})\/(\d{4})$/
-  .exec(String(v).trim());
-
-  if (m) {
-
-    return `${m[3]}-${m[2]}-${m[1]}`;
-
-  }
-
-  return "";
-
-};
-
-const dispFromYMD = ymd =>
-ymd
-? ymd.split("-").reverse().join("/")
-: "-";
-
-const daysInMonth = (y,m1_12) =>
-new Date(y, m1_12, 0).getDate();
+  if(/high|urgent|p1|critical/.test(u)) return "P1";
+  if(/medium|sedang|p2/.test(u))        return "P2";
+  if(/low|rendah|p3/.test(u))           return "P3";
+  return "Lainnya";
+}
 
 // ============================
-// FETCH API
+// FETCH
 // ============================
 
 async function postWorker(payload){
-
   const r = await fetch(WORKER_URL, {
-
     method:'POST',
-
-    headers:{
-      'Content-Type':'application/json'
-    },
-
+    headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify(payload)
+  });
+  return await r.json();
+}
 
+async function fetchInspeksi(){
+  const res = await postWorker({ action:"getInspeksi" });
+  return (res.success && Array.isArray(res.data)) ? res.data : [];
+}
+
+async function fetchJadwal(){
+  const res = await postWorker({ action:"getJadwal" });
+  return (res.success && Array.isArray(res.data)) ? res.data : [];
+}
+
+// ============================
+// COMPLIANCE DESC TEXT
+// ============================
+
+function complianceDescText(rate){
+  if(rate >= 95) return "Sangat baik, tingkat kepatuhan inspeksi berada pada kategori optimal.";
+  if(rate >= 80) return "Tingkat penyelesaian jadwal inspeksi menunjukkan performa yang sangat baik.";
+  if(rate >= 60) return "Baik, namun masih terdapat peluang peningkatan konsistensi.";
+  return "Perlu perhatian karena tingkat kepatuhan masih rendah.";
+}
+
+// ============================
+// STAT CARDS + DECISION SECTION
+// ============================
+
+function renderStats(inspeksi, jadwal){
+
+  const totalInspection = inspeksi.length;
+  const priority1 = inspeksi.filter(r => classifyPriority(r) === "P1").length;
+
+  const selesai = jadwal.filter(r =>
+    String(r.status || '').toLowerCase() === "selesai"
+  ).length;
+
+  const totalJadwal = jadwal.length;
+  const compliance = totalJadwal > 0
+    ? Math.round((selesai / totalJadwal) * 100)
+    : 0;
+
+  // Komponen dominan
+  const count = {};
+  inspeksi.forEach(r => {
+    const c = getComponent(r);
+    if(!c) return;
+    count[c] = (count[c] || 0) + 1;
   });
 
-  return await r.json();
+  const sorted = Object.entries(count).sort((a,b) => b[1] - a[1]);
+  const totalKomponen = sorted.reduce((s,[,v]) => s+v, 0);
+  const dominant = sorted.length ? sorted[0][0] : "—";
+  const dominantPct = sorted.length && totalKomponen
+    ? ((sorted[0][1] / totalKomponen) * 100).toFixed(1)
+    : "0";
 
-}
+  // -- Stat cards --
+  document.getElementById("totalInspection").textContent = totalInspection;
+  document.getElementById("highPriority").textContent = priority1;
+  document.getElementById("complianceRate").textContent = compliance + "%";
 
-async function getWorker(action){
+  // -- Decision Making Recommendation --
+  document.getElementById("dcKomponen").textContent = dominant;
+  document.getElementById("dcKomponenPct").textContent =
+    sorted.length ? `(${dominantPct.replace('.', ',')}%)` : "";
 
-  const r = await fetch(
-    `${WORKER_URL}?action=${action}`
+  document.getElementById("dcPriority").textContent = `${priority1} Temuan P1`;
+
+  document.getElementById("dcCompliance").textContent = compliance + "%";
+  document.getElementById("dcComplianceDesc").textContent = complianceDescText(compliance);
+
+  const rekom = [];
+  if(sorted.length) rekom.push(`Fokus inspeksi ${dominant}`);
+  if(priority1 > 0) rekom.push(`Segera tindak lanjuti temuan P1`);
+  if(sorted.length) rekom.push(`Siapkan spare part ${dominant}`);
+  rekom.push(
+    compliance >= 90
+      ? "Pertahankan compliance >90%"
+      : "Tingkatkan compliance inspeksi"
   );
 
-  return await r.json();
-
+  document.getElementById("dcRekomendasi").innerHTML =
+    rekom.map(r => `<li>${r}</li>`).join("");
 }
 
 // ============================
-// ELEMENT
+// TOP PROBLEM COMPONENT
 // ============================
 
-const twTbody =
-document.getElementById("tw-tbody");
-
-const twMsg =
-document.getElementById("tw-msg");
-
-const twDateEl =
-document.getElementById("tw-date");
-
-const monthPicker =
-document.getElementById('monthPicker');
-
-const monthSummary =
-document.getElementById('monthSummary');
-
-let chartStatus;
-let chartMonthly;
-
-// ============================
-// MESSAGE
-// ============================
-
-function twShowMsg(t){
-
-  if (twMsg){
-
-    twMsg.textContent = t;
-
-    twMsg.classList.remove('tw-hidden');
-
-  }
-
-}
-
-function twHideMsg(){
-
-  if (twMsg){
-
-    twMsg.classList.add('tw-hidden');
-
-  }
-
-}
-
-// ============================
-// TODAY WARNING
-// ============================
-
-async function loadTodayWarning(){
-
-  if(!twTbody) return;
-
-  twShowMsg('Memuat data...');
-
-  twTbody.innerHTML = "";
-
-  try{
-
-    const res =
-    await postWorker({
-      action:'getTodayWarning'
-    });
-
-    const rows =
-    Array.isArray(res.data)
-    ? res.data
-    : [];
-
-    const today =
-    res.today || todayYMD();
-
-    if(twDateEl){
-
-      twDateEl.textContent =
-      dispFromYMD(today);
-
-    }
-
-    if(!rows.length){
-
-      twTbody.innerHTML = `
-        <tr>
-          <td colspan="5"
-              class="muted">
-            Tidak ada unit yang jatuh tempo hari ini
-          </td>
-        </tr>
-      `;
-
-      twShowMsg(
-      "Tidak ada data jatuh tempo.");
-
-      return;
-
-    }
-
-    twHideMsg();
-
-    twTbody.innerHTML =
-    rows.map(r=>`
-
-      <tr>
-
-        <td>${r.Unit || '-'}</td>
-
-        <td>${r.Component || '-'}</td>
-
-        <td>${r.HM || '-'}</td>
-
-        <td>${r.NextPM || '-'}</td>
-
-        <td>
-
-          <span class="badge badge-warning">
-
-            Due Today
-
-          </span>
-
-        </td>
-
-      </tr>
-
-    `).join('');
-
-  }catch(err){
-
-    console.error(err);
-
-    twShowMsg(
-      'Gagal memuat data.'
-    );
-
-  }
-
-}
-
-// ============================
-// MONTHLY PM
-// ============================
-
-async function loadMonthlyPM(){
-
-  if(!monthPicker) return;
-
-  const ym = monthPicker.value;
-
-  if(!ym) return;
-
-  const [year,month] =
-  ym.split("-").map(Number);
-
-  try{
-
-    const res =
-    await postWorker({
-
-      action:'getMonthlyPM',
-
-      year,
-
-      month
-
-    });
-
-    const rows =
-    Array.isArray(res.data)
-    ? res.data
-    : [];
-
-    if(monthSummary){
-
-      monthSummary.innerHTML = `
-        Total Schedule:
-        <b>${rows.length}</b>
-        unit
-      `;
-
-    }
-
-    renderMonthlyChart(rows);
-
-  }catch(err){
-
-    console.error(err);
-
-  }
-
-}
-
-// ============================
-// CHART MONTHLY
-// ============================
-
-function renderMonthlyChart(rows){
-
-  const canvas =
-  document.getElementById(
-    'monthlyChart'
-  );
-
-  if(!canvas) return;
-
-  const ym =
-  monthPicker.value;
-
-  const [year,month] =
-  ym.split('-').map(Number);
-
-  const days =
-  daysInMonth(year,month);
-
-  const labels =
-  Array.from(
-    {length:days},
-    (_,i)=>String(i+1)
-  );
-
-  const counts =
-  Array(days).fill(0);
-
-  rows.forEach(r=>{
-
-    const ymd =
-    anyToYMD(
-      r.Date ||
-      r.Tanggal ||
-      r.date
-    );
-
-    if(!ymd) return;
-
-    const d =
-    Number(
-      ymd.split('-')[2]
-    );
-
-    if(d>=1 && d<=days){
-
-      counts[d-1]++;
-
-    }
-
+const barColors = ["#ef4444","#f97316","#f59e0b","#eab308","#84cc16","#22c55e","#10b981","#06b6d4"];
+
+function renderTopComponents(rows){
+
+  const count = {};
+  rows.forEach(r => {
+    const c = getComponent(r);
+    if(!c) return;
+    count[c] = (count[c] || 0) + 1;
   });
 
-  if(chartMonthly){
+  const sorted = Object.entries(count)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 8);
 
-    chartMonthly.destroy();
+  const sub = document.getElementById("topCompSub");
+  const list = document.getElementById("topCompList");
 
+  if(!sorted.length){
+    if(sub) sub.textContent = "Belum ada data temuan.";
+    if(list) list.innerHTML = "";
+    return;
   }
 
-  chartMonthly =
-  new Chart(canvas, {
+  const max = sorted[0][1];
 
-    type:'bar',
+  if(sub){
+    sub.textContent = `${sorted.length} komponen teratas • frekuensi temuan`;
+  }
 
-    data:{
+  list.innerHTML = sorted.map(([name, freq], i) => {
+    const width = max ? (freq / max) * 100 : 0;
+    const color = barColors[i % barColors.length];
 
-      labels,
+    return `
+      <div class="bar-row">
+        <div class="bar-name">${name}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${width}%;background:${color}"></div>
+        </div>
+        <div class="bar-value">${freq}</div>
+      </div>
+    `;
+  }).join("");
+}
 
-      datasets:[{
+// ============================
+// PRIORITY DISTRIBUTION
+// ============================
 
-        label:'Jumlah PM',
+let prioChart;
 
-        data:counts
+const PRIO_COLORS = {
+  "P1 — Critical": "#ef4444",
+  "P2 — Medium":   "#f59e0b",
+  "P3 — Low":      "#10b981",
+  "Lainnya":       "#64748b"
+};
 
-      }]
+function renderPriorityDistribution(rows){
 
-    },
+  const buckets = { "P1 — Critical":0, "P2 — Medium":0, "P3 — Low":0, "Lainnya":0 };
 
-    options:{
+  rows.forEach(r => {
+    const p = classifyPriority(r);
+    if(p === "P1") buckets["P1 — Critical"]++;
+    else if(p === "P2") buckets["P2 — Medium"]++;
+    else if(p === "P3") buckets["P3 — Low"]++;
+    else buckets["Lainnya"]++;
+  });
 
-      responsive:true,
+  const total = rows.length;
+  const labels = Object.keys(buckets);
+  const values = Object.values(buckets);
+  const colors = labels.map(l => PRIO_COLORS[l]);
 
-      maintainAspectRatio:false,
+  const canvas = document.getElementById("prioChart");
 
-      plugins:{
-
-        legend:{
-
-          display:false
-
-        }
-
+  if(prioChart){
+    prioChart.data.datasets[0].data = values;
+    prioChart.update();
+  } else if(canvas){
+    prioChart = new Chart(canvas, {
+      type: 'doughnut',
+      data:{
+        labels,
+        datasets:[{ data: values, backgroundColor: colors, borderWidth: 0 }]
       },
-
-      scales:{
-
-        y:{
-
-          beginAtZero:true,
-
-          ticks:{
-
-            precision:0
-
-          }
-
-        }
-
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        cutout:'68%',
+        plugins:{ legend:{ display:false } }
       }
+    });
+  }
 
-    }
-
-  });
-
+  const legendEl = document.getElementById("prioLegend");
+  if(legendEl){
+    legendEl.innerHTML = labels.map((label, i) => {
+      const val = values[i];
+      const pct = total ? ((val / total) * 100).toFixed(1) : "0.0";
+      return `
+        <div class="prio-legend-item">
+          <span class="prio-dot" style="background:${colors[i]}"></span>
+          <span class="prio-label">${label}</span>
+          <span class="prio-val">${val} <em>(${pct}%)</em></span>
+        </div>
+      `;
+    }).join("");
+  }
 }
 
 // ============================
-// STATUS CHART
+// LOAD + EVENTS
 // ============================
 
-function renderStatusChart(data){
+let rawInspeksi = [];
+let rawJadwal = [];
 
-  const canvas =
-  document.getElementById(
-    'statusChart'
-  );
+async function loadDashboard(){
 
-  if(!canvas) return;
+  rawInspeksi = await fetchInspeksi();
+  rawJadwal = await fetchJadwal();
 
-  const labels = [
-    'Open',
-    'Progress',
-    'Closed'
-  ];
-
-  const values = [
-
-    data.open || 0,
-
-    data.progress || 0,
-
-    data.closed || 0
-
-  ];
-
-  if(chartStatus){
-
-    chartStatus.destroy();
-
-  }
-
-  chartStatus =
-  new Chart(canvas, {
-
-    type:'doughnut',
-
-    data:{
-
-      labels,
-
-      datasets:[{
-
-        data:values
-
-      }]
-
-    },
-
-    options:{
-
-      responsive:true,
-
-      maintainAspectRatio:false
-
-    }
-
-  });
-
+  renderStats(rawInspeksi, rawJadwal);
+  applyTopCompFilter();
+  applyPrioFilter();
 }
 
-// ============================
-// ANALYTICS
-// ============================
-
-async function loadAnalytics(){
-
-  try{
-
-    const res =
-    await getWorker(
-      'dashboardAnalytics'
-    );
-
-    if(!res.success) return;
-
-    const data = res.data || {};
-
-    const totalInspection =
-    document.getElementById(
-      "totalInspection"
-    );
-
-    const totalOpen =
-    document.getElementById(
-      "totalOpen"
-    );
-
-    const totalClosed =
-    document.getElementById(
-      "totalClosed"
-    );
-
-    const totalProgress =
-    document.getElementById(
-      "totalProgress"
-    );
-
-    if(totalInspection){
-
-      totalInspection.innerText =
-      data.totalInspection || 0;
-
-    }
-
-    if(totalOpen){
-
-      totalOpen.innerText =
-      data.open || 0;
-
-    }
-
-    if(totalClosed){
-
-      totalClosed.innerText =
-      data.closed || 0;
-
-    }
-
-    if(totalProgress){
-
-      totalProgress.innerText =
-      data.progress || 0;
-
-    }
-
-    renderStatusChart(data);
-
-    renderKPI(data);
-
-  }catch(err){
-
-    console.error(err);
-
-  }
-
+function applyTopCompFilter(){
+  const el = document.getElementById("topCompFilter");
+  const days = el ? el.value : "all";
+  renderTopComponents(filterByDays(rawInspeksi, days));
 }
 
-// ============================
-// KPI
-// ============================
-
-function renderKPI(data){
-
-  const compliance =
-  document.getElementById(
-    "complianceRate"
-  );
-
-  const complianceDesc =
-  document.getElementById(
-    "complianceDesc"
-  );
-
-  const decisionBox =
-  document.getElementById(
-    "decisionBox"
-  );
-
-  if(compliance){
-
-    compliance.innerText =
-    (data.compliance || 0)
-    + "%";
-
-  }
-
-  const rate =
-  Number(
-    data.compliance || 0
-  );
-
-  if(complianceDesc){
-
-    if(rate >= 95){
-
-      complianceDesc.innerHTML =
-      "Sangat baik, tingkat kepatuhan inspeksi berada pada kategori optimal.";
-
-    }else if(rate >= 80){
-
-      complianceDesc.innerHTML =
-      "Baik, namun masih terdapat peluang peningkatan.";
-
-    }else{
-
-      complianceDesc.innerHTML =
-      "Perlu perhatian karena tingkat kepatuhan masih rendah.";
-
-    }
-
-  }
-
-  if(!decisionBox) return;
-
-  let html = "";
-
-  if(rate >= 95){
-
-    html += `
-      <div class="decision-good">
-        Sistem inspeksi berjalan optimal dan konsisten.
-      </div>
-    `;
-
-  }else if(rate >= 80){
-
-    html += `
-      <div class="decision-warning">
-        Perlu peningkatan konsistensi inspeksi untuk mencapai target maksimal.
-      </div>
-    `;
-
-  }else{
-
-    html += `
-      <div class="decision-danger">
-        Dibutuhkan evaluasi terhadap pelaksanaan inspeksi dan tindak lanjut.
-      </div>
-    `;
-
-  }
-
-  if(data.topComponent){
-
-    html += `
-      <div class="decision-item">
-        Komponen dengan temuan tertinggi:
-        <b>${data.topComponent}</b>
-      </div>
-    `;
-
-  }
-
-  if(data.priority1 > 0){
-
-    html += `
-      <div class="decision-item">
-        Terdapat
-        <b>${data.priority1}</b>
-        temuan Priority 1 yang memerlukan tindakan segera.
-      </div>
-    `;
-
-  }
-
-  decisionBox.innerHTML = html;
-
+function applyPrioFilter(){
+  const el = document.getElementById("prioFilter");
+  const days = el ? el.value : "all";
+  renderPriorityDistribution(filterByDays(rawInspeksi, days));
 }
-
- // ============================
-// INIT MONTH PICKER
-// ============================
-
-function initMonthPicker(){
-
-  if(!monthPicker) return;
-
-  const now = new Date();
-
-  monthPicker.value =
-  `${now.getFullYear()}-${pad2(now.getMonth()+1)}`;
-
-}
-
-// ============================
-// AUTO REFRESH
-// ============================
 
 function startAutoRefresh(){
-
-  setInterval(() => {
-
-    loadTodayWarning();
-
-    loadMonthlyPM();
-
-    loadAnalytics();
-
-  }, AUTO_REFRESH_MS);
-
+  setInterval(loadDashboard, AUTO_REFRESH_MS);
 }
 
-// ============================
-// EVENT
-// ============================
+window.addEventListener("DOMContentLoaded", () => {
 
-window.addEventListener(
-  "DOMContentLoaded",
-  () => {
+  loadDashboard();
+  startAutoRefresh();
 
-    initMonthPicker();
+  document.getElementById("topCompFilter")
+    ?.addEventListener("change", applyTopCompFilter);
 
-    loadTodayWarning();
+  document.getElementById("prioFilter")
+    ?.addEventListener("change", applyPrioFilter);
 
-    loadMonthlyPM();
-
-    loadAnalytics();
-
-    startAutoRefresh();
-
-    if(monthPicker){
-
-      monthPicker.addEventListener(
-        "change",
-        loadMonthlyPM
-      );
-
-    }
-
-  }
-);
+});
 
 })();
