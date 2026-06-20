@@ -384,3 +384,68 @@ body{
   .page-header h2{ font-size:19px; }
   .stat-number{ font-size:32px; }
 }
+
+/* =========================
+   JADWAL HARI INI TABLE
+========================= */
+
+.jadwal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.jadwal-table thead tr {
+  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+}
+
+.jadwal-table th {
+  padding: 10px 14px;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+}
+
+.jadwal-table td {
+  padding: 10px 14px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: var(--text, #e2e8f0);
+}
+
+.jadwal-table tbody tr:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.status-selesai {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.status-belum {
+  color: #f87171;
+  font-weight: 600;
+}
+
+.status-ditunda {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.btn-refresh {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-refresh:hover {
+  opacity: 0.85;
+}
