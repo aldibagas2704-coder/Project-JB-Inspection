@@ -8,16 +8,34 @@ const AUTO_REFRESH_MS = 60000;
 // ============================
 
 function parseDateFromRow(row){
-  // Cek semua kemungkinan nama field tanggal, termasuk tanggalYMD dari jadwal-script
-  const raw = row.tanggalYMD || row.Tanggal || row.tanggal || row.Date || row.date || "";
+  // Field dari getJadwal() di Apps Script: semua lowercase → 'tanggal'
+  // Field dari jadwal-script.js (processed): 'tanggalYMD'
+  // Google Sheets bisa kembalikan Date serial number, ISO string, atau DD/MM/YYYY
+  const raw = row.tanggal || row.tanggalYMD || row.Tanggal || row.Date || row.date || "";
   if(!raw) return null;
-  // YYYY-MM-DD: parse manual agar tidak kena offset timezone
-  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(raw).trim());
+
+  // Kalau angka → Google Sheets Date serial (hari sejak 30 Des 1899)
+  if(typeof raw === 'number'){
+    const msPerDay = 86400000;
+    const epoch = new Date(Date.UTC(1899, 11, 30));
+    return new Date(epoch.getTime() + raw * msPerDay);
+  }
+
+  const s = String(raw).trim();
+
+  // YYYY-MM-DD (dari input type=date)
+  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
   if(ymd) return new Date(Number(ymd[1]), Number(ymd[2])-1, Number(ymd[3]));
+
   // DD/MM/YYYY
-  const dmy = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(String(raw).trim());
+  const dmy = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(s);
   if(dmy) return new Date(Number(dmy[3]), Number(dmy[2])-1, Number(dmy[1]));
-  const d = new Date(raw);
+
+  // ISO string dari Sheets (mis: "2026-06-21T00:00:00.000Z")
+  const iso = /^(\d{4})-(\d{2})-(\d{2})T/.exec(s);
+  if(iso) return new Date(Number(iso[1]), Number(iso[2])-1, Number(iso[3]));
+
+  const d = new Date(s);
   return isNaN(d) ? null : d;
 }
 
