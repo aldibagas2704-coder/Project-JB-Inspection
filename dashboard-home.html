@@ -12,259 +12,132 @@
 
   <!-- PAGE HEADER -->
   <div class="page-header">
-
-    <div>
-      <h2>Dashboard Monitoring</h2>
-      <p class="page-sub">
-        Ringkasan performa inspeksi dan kondisi unit
-      </p>
-    </div>
-
+    <h2>Dashboard Inspection Report PT Jhonlin Baratama</h2>
   </div>
 
   <!-- KPI CARDS -->
-  <section class="stats-grid">
+  <section class="stats-grid-3">
 
-    <div class="stat-card">
-
-      <div class="card-icon">📋</div>
-
-      <div class="card-content">
-
-        <div class="stat-number"
-             id="totalInspection">
-          0
-        </div>
-
-        <div class="stat-label">
-          Total Inspection
-        </div>
-
-        <small>
-          Total inspeksi yang telah dilakukan
-        </small>
-
+    <div class="stat-card stat-blue">
+      <div class="stat-text">
+        <div class="stat-number" id="totalInspection">0</div>
+        <div class="stat-label">Total Inspection</div>
+        <div class="stat-sub">Total inspeksi yang telah dilakukan</div>
       </div>
-
+      <div class="stat-icon">📋</div>
     </div>
 
-    <div class="stat-card">
-
-      <div class="card-icon">🟢</div>
-
-      <div class="card-content">
-
-        <div class="stat-number"
-             id="totalClosed">
-          0
-        </div>
-
-        <div class="stat-label">
-          Closed
-        </div>
-
-        <small>
-          Temuan yang telah selesai ditindaklanjuti
-        </small>
-
+    <div class="stat-card stat-red">
+      <div class="stat-text">
+        <div class="stat-number" id="highPriority">0</div>
+        <div class="stat-label">High Priority</div>
+        <div class="stat-sub">Total temuan prioritas tinggi (P1)</div>
       </div>
-
+      <div class="stat-icon">⚠️</div>
     </div>
 
-    <div class="stat-card">
-
-      <div class="card-icon">🟡</div>
-
-      <div class="card-content">
-
-        <div class="stat-number"
-             id="totalProgress">
-          0
-        </div>
-
-        <div class="stat-label">
-          Progress
-        </div>
-
-        <small>
-          Temuan yang masih dalam proses
-        </small>
-
+    <div class="stat-card stat-green">
+      <div class="stat-text">
+        <div class="stat-number" id="complianceRate">0%</div>
+        <div class="stat-label">Compliance</div>
+        <div class="stat-sub">Tingkat penyelesaian jadwal inspeksi</div>
       </div>
-
-    </div>
-
-    <div class="stat-card">
-
-      <div class="card-icon">🔴</div>
-
-      <div class="card-content">
-
-        <div class="stat-number"
-             id="totalOpen">
-          0
-        </div>
-
-        <div class="stat-label">
-          Open
-        </div>
-
-        <small>
-          Temuan yang belum ditindaklanjuti
-        </small>
-
-      </div>
-
+      <div class="stat-icon">🛡️</div>
     </div>
 
   </section>
 
-  <!-- COMPLIANCE -->
-  <section class="kpi-section">
-
-    <div class="kpi-card">
-
-      <div class="kpi-title">
-        Compliance Rate
-      </div>
-
-      <div class="kpi-value"
-           id="complianceRate">
-        0%
-      </div>
-
-      <div class="kpi-desc"
-           id="complianceDesc">
-        Memuat data...
-      </div>
-
-    </div>
-
-    <div class="decision-card">
-
-      <div class="decision-title">
-        Decision Support
-      </div>
-
-      <div id="decisionBox">
-
-        <div class="decision-loading">
-          Memuat analisis...
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-    <!-- CHART SECTION -->
-  <section class="chart-grid">
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <h3>Status Temuan</h3>
-
-      </div>
-
-      <div class="chart-container">
-
-        <canvas id="statusChart"></canvas>
-
-      </div>
-
-    </div>
-
-    <div class="card">
-
-      <div class="card-head">
-
-        <h3>Schedule PM Bulanan</h3>
-
-        <input type="month"
-               id="monthPicker">
-
-      </div>
-
-      <div id="monthSummary"
-           class="month-summary">
-
-        Total Schedule:
-        <b>0</b>
-
-      </div>
-
-      <div class="chart-container">
-
-        <canvas id="monthlyChart"></canvas>
-
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- TODAY WARNING -->
+  <!-- DECISION MAKING RECOMMENDATION -->
   <section class="card">
-
     <div class="card-head">
-
-      <h3>
-        Unit PM Jatuh Tempo Hari Ini
-      </h3>
-
-      <span id="tw-date">
-        -
-      </span>
-
+      <h3>Decision Making Recommendation</h3>
     </div>
 
-    <div id="tw-msg"
-         class="tw-msg">
-      Memuat data...
+    <div class="card-body">
+      <div class="decision-grid">
+
+        <div class="decision-col">
+          <div class="dc-icon dc-blue">🔄</div>
+          <div class="dc-title">Komponen Dominan</div>
+          <div class="dc-value" id="dcKomponen">—</div>
+          <div class="dc-pct" id="dcKomponenPct"></div>
+          <div class="dc-desc">
+            Komponen dengan frekuensi temuan tertinggi berdasarkan analisis Pareto.
+          </div>
+        </div>
+
+        <div class="decision-col">
+          <div class="dc-icon dc-red">⚠️</div>
+          <div class="dc-title">Priority Critical</div>
+          <div class="dc-value" id="dcPriority">0 Temuan P1</div>
+          <div class="dc-desc">
+            Jumlah temuan dengan kategori prioritas P1 (Critical) yang perlu segera ditindaklanjuti.
+          </div>
+        </div>
+
+        <div class="decision-col">
+          <div class="dc-icon dc-green">🛡️</div>
+          <div class="dc-title">Compliance</div>
+          <div class="dc-value" id="dcCompliance">0%</div>
+          <div class="dc-desc" id="dcComplianceDesc">Memuat data...</div>
+        </div>
+
+        <div class="decision-col">
+          <div class="dc-icon dc-yellow">💡</div>
+          <div class="dc-title">Rekomendasi</div>
+          <ul class="dc-list" id="dcRekomendasi">
+            <li>Memuat data...</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CHART SECTION -->
+  <section class="chart-grid-2">
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Top Problem Component</h3>
+        <select id="topCompFilter" class="filter-select">
+          <option value="all">Semua Waktu</option>
+          <option value="7">7 Hari Terakhir</option>
+          <option value="30">30 Hari Terakhir</option>
+          <option value="90">90 Hari Terakhir</option>
+        </select>
+      </div>
+
+      <div class="card-body">
+        <div class="muted small-sub" id="topCompSub">— komponen teratas • frekuensi temuan</div>
+        <div id="topCompList" class="bar-list"></div>
+      </div>
     </div>
 
-    <div class="table-wrap">
+    <div class="card">
+      <div class="card-head">
+        <h3>Priority Distribution</h3>
+        <select id="prioFilter" class="filter-select">
+          <option value="all">Semua Waktu</option>
+          <option value="7">7 Hari Terakhir</option>
+          <option value="30">30 Hari Terakhir</option>
+          <option value="90">90 Hari Terakhir</option>
+        </select>
+      </div>
 
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>Unit</th>
-            <th>Component</th>
-            <th>HM</th>
-            <th>Next PM</th>
-            <th>Status</th>
-
-          </tr>
-
-        </thead>
-
-        <tbody id="tw-tbody">
-
-          <tr>
-
-            <td colspan="5">
-              Memuat data...
-            </td>
-
-          </tr>
-
-        </tbody>
-
-      </table> 
-
+      <div class="card-body prio-body">
+        <div class="prio-chart-wrap">
+          <canvas id="prioChart" class="prio-chart"></canvas>
+        </div>
+        <div class="prio-legend" id="prioLegend"></div>
+      </div>
     </div>
 
   </section>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="dashboard-home.js"></script>
 </body>
 </html>
