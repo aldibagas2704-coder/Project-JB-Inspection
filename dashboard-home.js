@@ -32,8 +32,10 @@ function parseDateFromRow(row){
   if(dmy) return new Date(Number(dmy[3]), Number(dmy[2])-1, Number(dmy[1]));
 
   // ISO string dari Sheets (mis: "2026-06-21T00:00:00.000Z")
-  const iso = /^(\d{4})-(\d{2})-(\d{2})T/.exec(s);
-  if(iso) return new Date(Number(iso[1]), Number(iso[2])-1, Number(iso[3]));
+  if (s.includes("T")) {
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
 
   const d = new Date(s);
   return isNaN(d) ? null : d;
