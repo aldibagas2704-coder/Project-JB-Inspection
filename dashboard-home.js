@@ -494,6 +494,15 @@ function renderJadwalHariIniTable(jadwalRows) {
 let rawInspeksi = [];
 let rawJadwal   = [];
 
+console.log("TOTAL JADWAL :", rawJadwal.length);
+
+rawJadwal.forEach(r=>{
+  console.log(
+    r.tanggal,
+    parseDateFromRow(r)
+  );
+});
+  
 async function loadDashboard(){
   rawInspeksi = await fetchInspeksi();
   rawJadwal   = await fetchJadwal();
