@@ -8,11 +8,15 @@ const AUTO_REFRESH_MS = 60000;
 // ============================
 
 function parseDateFromRow(row){
-  const raw = row.Tanggal || row.tanggal || row.Date || row.date || "";
+  // Cek semua kemungkinan nama field tanggal, termasuk tanggalYMD dari jadwal-script
+  const raw = row.tanggalYMD || row.Tanggal || row.tanggal || row.Date || row.date || "";
   if(!raw) return null;
-  if(/^\d{4}-\d{2}-\d{2}/.test(raw)) return new Date(raw.slice(0,10));
-  const m = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(String(raw).trim());
-  if(m) return new Date(`${m[3]}-${m[2]}-${m[1]}`);
+  // YYYY-MM-DD: parse manual agar tidak kena offset timezone
+  const ymd = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(raw).trim());
+  if(ymd) return new Date(Number(ymd[1]), Number(ymd[2])-1, Number(ymd[3]));
+  // DD/MM/YYYY
+  const dmy = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(String(raw).trim());
+  if(dmy) return new Date(Number(dmy[3]), Number(dmy[2])-1, Number(dmy[1]));
   const d = new Date(raw);
   return isNaN(d) ? null : d;
 }
@@ -285,7 +289,7 @@ function renderStatusHariIni(jadwalRows) {
   });
 
   const selesai  = todayRows.filter(r => String(r.status||'').toLowerCase() === 'selesai').length;
-  const belum    = todayRows.length - selesai;
+  const belum    = todayRows.length - selesai;  // termasuk status kosong (draft) dan 'belum'
 
   const canvas   = document.getElementById('statusHariIniChart');
   const legendEl = document.getElementById('statusHariIniLegend');
@@ -445,14 +449,15 @@ function renderJadwalHariIniTable(jadwalRows) {
   }
 
   tbody.innerHTML = todayRows.map(r => {
-    const kode   = r.kode || r['kode unit'] || r['Kode Unit'] || '-';
-    const d      = parseDateFromRow(r);
-    const tgl    = d ? formatDDMMYYYY(d) : '-';
-    const lokasi = r.lokasi || r.Lokasi || r.site || '-';
-    const status = r.status || r.Status || '';
-    const cls    = status.toLowerCase() === 'selesai' ? 'status-selesai'
-                 : status.toLowerCase() === 'ditunda' ? 'status-ditunda'
-                 : 'status-belum';
+    const kode        = r.kode || r['kode unit'] || r['Kode Unit'] || r['kodeUnit'] || r['Kode'] || '-';
+    const d           = parseDateFromRow(r);
+    const tgl         = d ? formatDDMMYYYY(d) : '-';
+    const lokasi      = r.lokasi || r.Lokasi || r.site || r.Site || r.location || r.Location || '-';
+    const status      = r.status || r.Status || '';
+    const statusLower = status.toLowerCase();
+    const cls         = statusLower === 'selesai' ? 'status-selesai'
+                      : statusLower === 'ditunda' ? 'status-ditunda'
+                      : 'status-belum';
     return `<tr>
       <td>${kode}</td>
       <td>${tgl}</td>
@@ -477,7 +482,6 @@ async function loadDashboard(){
   applyTopCompFilter();
   applyPrioFilter();
 
-  // Grafik & tabel jadwal
   renderStatusHariIni(rawJadwal);
 
   const picker = document.getElementById('bulananMonthPicker');
