@@ -141,23 +141,23 @@ function renderInsightBox(data, filterDays) {
   const domPct   = data[0].persen.toFixed(1);
 
   const periodeLabel =
-    filterDays === "all" ? "semua waktu" :
-    filterDays === "7" ? "7 hari terakhir" :
-    filterDays === "30" ? "30 hari terakhir" :
-    "90 hari terakhir";
+    filterDays === "all" ? "all time" :
+    filterDays === "7" ? "last 7 days" :
+    filterDays === "30" ? "last 30 days" :
+    "last 90 days";
 
   el.innerHTML = `
-    Dari <b>${total} total temuan</b> selama <b>${periodeLabel}</b>,
-    komponen <b>${dominant}</b> mendominasi dengan kontribusi
+    Out of <b>${total} total findings</b> over <b>${periodeLabel}</b>,
+    the <b>${dominant}</b> component dominates with a contribution of
     <b>${domPct}%</b>.
 
-    Sebanyak <b>${katA.length} komponen</b>
-    masuk Kategori A (Vital) dan menyumbang
-    <b>${pctA}%</b> dari seluruh temuan.
+    A total of <b>${katA.length} components</b>
+    fall into Priority A (Critical) and account for
+    <b>${pctA}%</b> of all findings.
 
     ${katB.length
-      ? `Terdapat <b>${katB.length} komponen</b>
-         Kategori B yang perlu pemantauan berkala.`
+      ? `There are <b>${katB.length} components</b>
+         in Priority B that require regular monitoring.`
       : ""}
   `;
 }
@@ -226,7 +226,7 @@ function renderChart(data) {
       datasets:[
         {
           type:"bar",
-          label:"Frekuensi Temuan",
+          label:"Fault Frequency",
           data:freqs,
           backgroundColor:barColors,
           borderRadius:5,
@@ -235,7 +235,7 @@ function renderChart(data) {
         },
         {
           type:"line",
-          label:"Kumulatif %",
+          label:"Cumulative %",
           data:cumPcts,
           borderColor:"#38bdf8",
           borderWidth:2.5,
@@ -273,8 +273,8 @@ function renderChart(data) {
               const d   = data[idx];
 
               return [
-                `Kumulatif : ${d.kumulatif.toFixed(1)}%`,
-                `Kategori : ${d.kategori}`
+                `Cumulative : ${d.kumulatif.toFixed(1)}%`,
+                `Priority   : ${d.kategori}`
               ];
             }
           }
@@ -289,7 +289,7 @@ function renderChart(data) {
           beginAtZero:true,
           title:{
             display:true,
-            text:"Frekuensi Temuan"
+            text:"Fault Frequency"
           }
         },
 
@@ -300,7 +300,7 @@ function renderChart(data) {
           max:100,
           title:{
             display:true,
-            text:"Kumulatif (%)"
+            text:"Cumulative (%)"
           },
           ticks:{
             callback:v => v + "%"
@@ -331,12 +331,12 @@ function renderTable(data) {
       <tr>
         <td colspan="7"
             style="text-align:center;padding:24px">
-          Belum ada data untuk dianalisis.
+          No data available for analysis.
         </td>
       </tr>
     `;
 
-    if(msgEl) msgEl.textContent = "Tidak ada data.";
+    if(msgEl) msgEl.textContent = "No data.";
     return;
   }
 
@@ -351,8 +351,8 @@ function renderTable(data) {
 
   if(msgEl){
     msgEl.textContent =
-      `${data.length} komponen dianalisis •
-      ${katA.length} kategori A`;
+      `${data.length} components analyzed •
+      ${katA.length} Priority A`;
   }
 
   tbody.innerHTML = data.map((d,i)=>{
@@ -369,8 +369,15 @@ function renderTable(data) {
         ? "badge-b"
         : "badge-c";
 
+    const badgeLabel =
+      d.kategori==="A"
+        ? "🔴 A — Critical"
+        : d.kategori==="B"
+        ? "🟡 B — Monitor"
+        : "🟢 C — Low Risk";
+
     return `
-      <tr>
+      <tr class="${d.kategori==="A" ? "row-a" : ""}">
         <td>${i+1}</td>
         <td>${d.komponen}</td>
         <td>${d.frekuensi}</td>
@@ -388,7 +395,7 @@ function renderTable(data) {
 
         <td>
           <span class="badge ${badgeClass}">
-            ${d.kategori}
+            ${badgeLabel}
           </span>
         </td>
       </tr>
@@ -419,7 +426,7 @@ async function loadAll() {
 
     if(msgEl)
       msgEl.textContent =
-      "Memuat data dari server...";
+      "Loading data from server...";
 
     rawData = await fetchInspeksi();
   }
