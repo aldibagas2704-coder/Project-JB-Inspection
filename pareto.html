@@ -1,9 +1,10 @@
+
 <!doctype html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Analisis Pareto</title>
+  <title>Pareto Analysis — ABC Classification</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="pareto.css" />
 </head>
@@ -12,15 +13,15 @@
   <!-- HEADER -->
   <div class="page-header">
     <div>
-      <h2>Analisis Pareto</h2>
-      <p class="page-sub">Klasifikasi komponen bermasalah berdasarkan prinsip 80/20</p>
+      <h2>Pareto Analysis</h2>
+      <p class="page-sub">Fault component classification based on the 80/20 principle</p>
     </div>
     <div class="header-controls">
       <select id="paretoFilter" class="filter-select">
-        <option value="all">Semua Waktu</option>
-        <option value="7">7 Hari Terakhir</option>
-        <option value="30">30 Hari Terakhir</option>
-        <option value="90">90 Hari Terakhir</option>
+        <option value="all">All Time</option>
+        <option value="7">Last 7 Days</option>
+        <option value="30">Last 30 Days</option>
+        <option value="90">Last 90 Days</option>
       </select>
       <button id="btnRefresh" class="btn-refresh">↻ Refresh</button>
     </div>
@@ -29,27 +30,27 @@
   <!-- INSIGHT CARDS -->
   <section class="insight-grid" id="insightGrid">
     <div class="insight-card ic-blue">
-      <div class="ic-label">Total Komponen</div>
+      <div class="ic-label">Total Components</div>
       <div class="ic-value" id="icTotal">—</div>
-      <div class="ic-sub">dianalisis</div>
+      <div class="ic-sub">analyzed</div>
     </div>
 
     <div class="insight-card ic-red">
-      <div class="ic-label">Kategori A (Vital)</div>
+      <div class="ic-label">🔴 Priority A — Critical</div>
       <div class="ic-value" id="icKatA">—</div>
-      <div class="ic-sub">komponen ≤80% kumulatif</div>
+      <div class="ic-sub">components within top 80% of faults</div>
     </div>
 
     <div class="insight-card ic-yellow">
-      <div class="ic-label">Sumbangan Kategori A</div>
+      <div class="ic-label">Priority A — Share of Total Faults</div>
       <div class="ic-value" id="icPctA">—</div>
-      <div class="ic-sub">dari total temuan</div>
+      <div class="ic-sub">of all findings</div>
     </div>
 
     <div class="insight-card ic-green">
-      <div class="ic-label">Komponen Dominan</div>
+      <div class="ic-label">Top Fault Component</div>
       <div class="ic-value" id="icDominant">—</div>
-      <div class="ic-sub">frekuensi tertinggi</div>
+      <div class="ic-sub">highest fault frequency</div>
     </div>
   </section>
 
@@ -57,20 +58,20 @@
   <section class="insight-box" id="insightBox">
     <div class="ib-icon">📊</div>
     <div id="insightText" class="ib-text">
-      Memuat analisis...
+      Loading analysis...
     </div>
   </section>
 
   <!-- CHART PARETO -->
   <section class="card pareto-chart-card">
     <div class="card-head">
-      <h3>Grafik Pareto — Frekuensi &amp; Kumulatif %</h3>
+      <h3>Pareto Chart — Fault Frequency & Cumulative %</h3>
 
       <div class="legend-inline">
-        <span class="li-dot" style="background:#ef4444"></span> Kategori A
-        <span class="li-dot" style="background:#f59e0b;margin-left:10px"></span> Kategori B
-        <span class="li-dot" style="background:#10b981;margin-left:10px"></span> Kategori C
-        <span class="li-line" style="margin-left:10px"></span> Kumulatif %
+        <span class="li-dot" style="background:#ef4444"></span> Priority A — Critical
+        <span class="li-dot" style="background:#f59e0b;margin-left:10px"></span> Priority B — Monitor
+        <span class="li-dot" style="background:#10b981;margin-left:10px"></span> Priority C — Low Risk
+        <span class="li-line" style="margin-left:10px"></span> Cumulative %
       </div>
     </div>
 
@@ -82,7 +83,26 @@
       </div>
 
       <div class="threshold-label">
-        ― Garis batas 80% (prinsip Pareto)
+        ― 80% threshold line (Pareto principle)
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIORITY KEY -->
+  <section class="priority-key">
+    <div class="pk-title">📋 Priority Classification Guide</div>
+    <div class="pk-items">
+      <div class="pk-item">
+        <span class="badge badge-a">🔴 A — Critical</span>
+        <span class="pk-desc">Components that cause <strong>80% of all faults</strong>. Fix these first — highest ROI.</span>
+      </div>
+      <div class="pk-item">
+        <span class="badge badge-b">🟡 B — Monitor</span>
+        <span class="pk-desc">Components contributing the <strong>next 15%</strong> of faults. Schedule regular checks.</span>
+      </div>
+      <div class="pk-item">
+        <span class="badge badge-c">🟢 C — Low Risk</span>
+        <span class="pk-desc">Remaining components with <strong>minimal fault impact</strong>. Lowest priority.</span>
       </div>
     </div>
   </section>
@@ -90,12 +110,12 @@
   <!-- TABEL ABC -->
   <section class="card pareto-table-card">
     <div class="card-head">
-      <h3>Tabel Klasifikasi ABC</h3>
+      <h3>ABC Classification Table</h3>
 
       <div class="abc-legend">
-        <span class="badge badge-a">A — Vital</span>
-        <span class="badge badge-b">B — Useful</span>
-        <span class="badge badge-c">C — Non-essential</span>
+        <span class="badge badge-a">🔴 A — Critical (Must Fix)</span>
+        <span class="badge badge-b">🟡 B — Monitor (Watch)</span>
+        <span class="badge badge-c">🟢 C — Low Risk (Optional)</span>
       </div>
     </div>
 
@@ -105,12 +125,12 @@
           <thead>
             <tr>
               <th>No</th>
-              <th>Komponen</th>
-              <th>Frekuensi</th>
-              <th>%</th>
-              <th>Kumulatif %</th>
-              <th>Bar Kumulatif</th>
-              <th>Kategori</th>
+              <th>Component</th>
+              <th>Fault Count</th>
+              <th>% of Total</th>
+              <th>Cumulative %</th>
+              <th>Cumulative Bar</th>
+              <th>Priority</th>
             </tr>
           </thead>
 
@@ -119,7 +139,7 @@
               <td colspan="7"
                   class="muted"
                   style="text-align:center;padding:20px">
-                Memuat data...
+                Loading data...
               </td>
             </tr>
           </tbody>
