@@ -35,10 +35,50 @@ label {
 input {
   width: 100%;
   padding: 12px;
-  border: none;
+  border: 2px solid transparent;
   border-radius: 8px;
   outline: none;
   font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+input.input-error {
+  border-color: #ff4d4f;
+  background: #fff1f0;
+}
+
+/* Notifikasi */
+.alert-message {
+  display: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+  animation: fadeIn 0.25s ease;
+}
+.alert-message.show {
+  display: block;
+}
+.alert-message.error {
+  background: rgba(255, 77, 79, 0.15);
+  color: #ff7875;
+  border: 1px solid #ff4d4f;
+}
+.alert-message.warning {
+  background: rgba(255, 197, 61, 0.15);
+  color: #ffd666;
+  border: 1px solid #ffc53d;
+}
+.alert-message.success {
+  background: rgba(82, 196, 26, 0.15);
+  color: #95de64;
+  border: 1px solid #52c41a;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .btn {
   width: 48%;
