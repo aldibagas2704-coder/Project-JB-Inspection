@@ -387,7 +387,7 @@ function renderTable(data) {
         <td>
           <div class="cum-bar-wrap">
             <div
-              class="cum-bar-fill"
+              class="cum-bar-fill fill-${d.kategori.toLowerCase()}"
               style="width:${cumWidth}%">
             </div>
           </div>
