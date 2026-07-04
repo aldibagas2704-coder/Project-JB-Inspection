@@ -317,7 +317,12 @@ h2 {
   height: 8px;
   border-radius: 3px;
   transition: width 0.5s ease;
+  background: linear-gradient(90deg, #38bdf8, #6366f1);
 }
+
+.cum-bar-fill.fill-a { background: #ef4444; }
+.cum-bar-fill.fill-b { background: #f59e0b; }
+.cum-bar-fill.fill-c { background: #10b981; }
 
 .cum-bar-line {
   position: absolute;
